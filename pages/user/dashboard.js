@@ -1,9 +1,9 @@
 import { useState } from "react";
-import AdminLayout from "../../components/layouts/admin/AdminLayout";
+import UserLayout from "../../components/layouts/user/UserLayout";
 
 export default function Dashboard() {
   return (
-    <AdminLayout title="Dashboard">
+    <UserLayout title="Dashboard">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb">
         <h1>Dashboard</h1>
@@ -167,6 +167,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </UserLayout>
   );
 }
