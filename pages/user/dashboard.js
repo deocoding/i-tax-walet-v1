@@ -1,7 +1,20 @@
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
 import UserLayout from "../../components/layouts/user/UserLayout";
+import { Store } from "../../utils/Store";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { redirect } = router.query;
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (!userInfo) {
+      router.push("/");
+    }
+  });
+
   return (
     <UserLayout title="Dashboard">
       {/* <!-- Breadcrumb --> */}
@@ -9,7 +22,7 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
         <ul>
           <li>
-            <a href="#">Login</a>
+            <span>User</span>
           </li>
           <li className="divider las las-arrow-right"></li>
           <li>Dashboard</li>
@@ -42,18 +55,18 @@ export default function Dashboard() {
             <div className="lg:w-1/2 lg:px-4">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-bullseye"></span>
-                <p className="mt-2">Target Penerimaan</p>
+                <p className="mt-2">Target Pajak</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  Rp.500.000.000
+                  Rp0
                 </div>
               </div>
             </div>
             <div className="lg:w-1/2 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-chart-line"></span>
-                <p className="mt-2">Realisasi Penerimaan</p>
+                <p className="mt-2">Realisasi</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  Rp.200.000.000
+                  Rp0
                 </div>
               </div>
             </div>
@@ -64,104 +77,83 @@ export default function Dashboard() {
             <div className="lg:w-1/3 lg:px-4">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-industry"></span>
-                <p className="mt-2">Bangunan NPWPD</p>
+                <p className="mt-2">Status Bangunan</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  18
+                  Pendaftaran
                 </div>
               </div>
             </div>
             <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-receipt"></span>
-                <p className="mt-2">Sudah Membayar</p>
-                <div className="text-primary mt-5 text-3xl leading-none">
-                  16
-                </div>
+                <p className="mt-2">Pelaporan Pajak</p>
+                <div className="text-primary mt-5 text-3xl leading-none">0</div>
               </div>
             </div>
             <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
-                <span className="text-primary text-5xl leading-none las las-user-plus"></span>
-                <p className="mt-2">Usul Baru</p>
-                <div className="text-primary mt-5 text-3xl leading-none">9</div>
+                <span className="text-primary text-5xl leading-none las las-address-book"></span>
+                <p className="mt-2">Status Pemilik</p>
+                <div className="text-primary mt-5 text-3xl leading-none">
+                  Pendaftaran
+                </div>
               </div>
             </div>
           </div>
 
           {/* <!-- Recent Posts --> */}
           <div className="card mt-5 p-5">
-            <h3 className="uppercase pb-3">
-              Sebaran &#38; Potensi Pajak per Kecamatan
-            </h3>
+            <h3 className="uppercase pb-3">Pelaporan pajak terbaru</h3>
             <table className="table table_list mt-3 w-full">
               <thead>
                 <tr>
                   <th className="w-px ltr:text-left rtl:text-right uppercase">
-                    Kecamatan
+                    Penjualan
                   </th>
-                  <th className="w-px uppercase">Jumlah Bangunan</th>
-                  <th className="w-px uppercase">Potensi</th>
+                  <th className="w-px uppercase">Total Pajak</th>
+                  <th className="w-px uppercase">Status</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Pahandut</td>
-                  <td className="text-center">121</td>
+                  <td colSpan={3}>Data Kosong</td>
+                </tr>
+                {/* <tr>
+                  <td>15 Kg</td>
+                  <td className="text-center">Rp5.000.000</td>
                   <td className="text-center">
                     <div className="badge badge_outlined badge_secondary uppercase">
-                      32,52%
+                      Denda
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>Jekan Raya</td>
-                  <td className="text-center">168</td>
+                  <td>17 Kg</td>
+                  <td className="text-center">Rp6.000.000</td>
                   <td className="text-center">
                     <div className="badge badge_outlined badge_success uppercase">
-                      82%
+                      Lunas
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>Sabangau</td>
-                  <td className="text-center">46</td>
+                  <td>4 Kg</td>
+                  <td className="text-center">Rp1.500.000</td>
                   <td className="text-center">
                     <div className="badge badge_outlined badge_warning uppercase">
-                      67%
+                      Kurang
                     </div>
                   </td>
                 </tr>
                 <tr>
-                  <td>Bukit Batu</td>
-                  <td className="text-center">18</td>
+                  <td>24 Kg</td>
+                  <td className="text-center">Rp10.000.000</td>
                   <td className="text-center">
-                    <div className="badge badge_outlined badge_success uppercase">
-                      4,84%
+                    <div className="badge badge_outlined badge_info uppercase">
+                      Proses
                     </div>
                   </td>
-                </tr>
-                <tr>
-                  <td>Rakumpit</td>
-                  <td className="text-center">9</td>
-                  <td className="text-center">
-                    <div className="badge badge_outlined badge_secondary uppercase">
-                      2,42%
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-
-              <tbody>
-                <tr>
-                  <th className="ltr:text-left rtl:text-right uppercase">
-                    Jumlah
-                  </th>
-                  <th className="w-px uppercase">372</th>
-                  <th className="w-px uppercase">
-                    500.000.000 <br />
-                    (Naik 31,6%)
-                  </th>
-                </tr>
+                </tr> */}
               </tbody>
             </table>
           </div>

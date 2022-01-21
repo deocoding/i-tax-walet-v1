@@ -1,8 +1,10 @@
 import Tippy from "@tippyjs/react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 function TopBar({ title }) {
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [aksi, setAksi] = useState({});
@@ -278,15 +280,6 @@ function TopBar({ title }) {
       <nav className="flex items-center ltr:ml-auto rtl:mr-auto">
         {/* <!-- Dark Mode --> */}
         {renderThemeChanger()}
-        {/* <label
-          className="switch switch_outlined"
-          data-toggle="tooltip"
-          data-tippy-content="Toggle Dark Mode"
-          aria-expanded="false"
-        >
-          <input id="darkModeToggler" type="checkbox" />
-          <span></span>
-        </label> */}
 
         {/* <!-- Fullscreen --> */}
         <>
@@ -307,10 +300,10 @@ function TopBar({ title }) {
           </Tippy>
         </>
 
-        {/* <!-- Register --> */}
+        {/* <!-- Register/Login --> */}
         <a
-          href={aksi.linkAksi}
           className="btn btn_primary uppercase ltr:ml-5 rtl:mr-5"
+          onClick={() => router.push(aksi.linkAksi)}
         >
           {aksi.jdlAksi}
         </a>

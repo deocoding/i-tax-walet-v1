@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {
       router.push("/admin/dashboard");
-    } else {
+    } else if (userInfo && !userInfo.isAdmin) {
       router.push("/user/dashboard");
     }
   });
@@ -42,9 +42,8 @@ export default function Home() {
       Cookies.set("userInfo", JSON.stringify(data));
       if (data.isAdmin) {
         router.push("/admin/dashboard");
-      } else {
-        router.push("/user/dashboard");
       }
+      alert("tes");
     } catch (err) {
       alert(err.response.data ? err.response.data.message : err.message);
     }
@@ -95,9 +94,9 @@ export default function Home() {
             </label>
           </div>
           <div className="flex items-center">
-            <a href="auth-forgot-password.html" className="text-sm uppercase">
+            {/* <a href="auth-forgot-password.html" className="text-sm uppercase">
               Lupa Password?
-            </a>
+            </a> */}
             <button
               type="submit"
               className="btn btn_primary ltr:ml-auto rtl:mr-auto uppercase"
