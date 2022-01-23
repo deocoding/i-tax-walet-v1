@@ -6,12 +6,13 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
+    image: { type: String },
+    hpTel: { type: String },
     npwpd: { type: String },
     alamat: {
       detail: { type: String },
       kec: { type: String },
       kabKot: { type: String },
-      hpTel: { type: String },
     },
     status: { type: Number, required: true, default: 1 },
   },
@@ -22,3 +23,6 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 export default User;
+
+// STATUS :
+// 1 = Pendaftaran; 2 = Pendataan; 3 = Perubahan

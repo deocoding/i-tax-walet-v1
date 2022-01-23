@@ -1,7 +1,23 @@
-import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/router";
+import { useContext, useState } from "react";
 import GuestLayout from "../components/layouts/guest/GuestLayout";
+import { Store } from "../utils/Store";
+import { useForm } from "react-hook-form";
+import { getError } from "../utils/error";
+import Cookies from "js-cookie";
 
 export default function Register() {
+  const router = useRouter();
+  const { redirect } = router.query;
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm();
+
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState(false);
 
@@ -21,35 +37,85 @@ export default function Register() {
     setPassword2Icon(!password2Icon);
   };
 
+  useState(() => {
+    if (userInfo) {
+      if (userInfo.isAdmin) {
+        router.push(redirect || "/admin/dashboard");
+      }
+      router.push(redirect || "/user/dashboard");
+    }
+  });
+
+  const registerHandler = async ({
+    namaLengkap,
+    email,
+    password,
+    ulangiPassword,
+  }) => {
+    if (password !== ulangiPassword) {
+      alert("password tidak sama");
+    }
+    try {
+      const { data } = await axios.post("/api/users/register", {
+        namaLengkap,
+        email,
+        password,
+      });
+      dispatch({ type: "USER_LOGIN", payload: data });
+      Cookies.set("userInfo", JSON.stringify(data));
+      router.push("/user/detail");
+    } catch (err) {
+      getError(err);
+    }
+  };
+
   return (
     <GuestLayout title="Register">
       <div className="w-full md:w-1/2 xl:w-1/3">
-        <div className="mx-5 md:mx-10">
-          <h2 className="uppercase">Create Your Account</h2>
-          <h4 className="uppercase">Let&apos;s Roll</h4>
+        <div className="flex flex-col mx-5 md:mx-10 items-center">
+          <h2 className="uppercase">Daftarkan akun anda</h2>
+          <h4 className="uppercase">Silahkan mengisi form dibawah</h4>
         </div>
-        <form className="card mt-5 p-5 md:p-10" action="#">
+        <form
+          className="card mt-5 p-5 md:p-10"
+          onSubmit={handleSubmit(registerHandler)}
+        >
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="name">
-              Name
+              Nama Lengkap
             </label>
             <input
-              id="name"
+              {...register("namaLengkap", { required: true })}
+              id="namaLengkap"
               type="text"
               className="form-control"
-              placeholder="John Doe"
+              autoFocus={!0}
             />
+            <small className="block mt-2 invalid-feedback">
+              {errors.namaLengkap?.type === "required" &&
+                "Field diatas tidak boleh kosong"}
+            </small>
           </div>
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="email">
               Email
             </label>
             <input
+              {...register("email", {
+                required: true,
+                pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
+              })}
               id="email"
               type="text"
               className="form-control"
-              placeholder="example@example.com"
             />
+            <small className="block mt-2 invalid-feedback">
+              {errors.email
+                ? errors.email.type === "pattern"
+                  ? "Email tidak valid"
+                  : "Field diatas tidak boleh kosong"
+                : ""}
+            </small>
           </div>
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="password">
@@ -57,10 +123,10 @@ export default function Register() {
             </label>
             <label className="form-control-addon-within">
               <input
+                {...register("password", { required: true })}
                 id="password"
                 type={passwordShown ? "text" : "password"}
                 className="form-control border-none"
-                value="12345"
               />
               <span className="flex items-center ltr:pr-4 rtl:pl-4">
                 <button
@@ -74,17 +140,21 @@ export default function Register() {
                 ></button>
               </span>
             </label>
+            <small className="block mt-2 invalid-feedback">
+              {errors.password?.type === "required" &&
+                "Field diatas tidak boleh kosong"}
+            </small>
           </div>
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="password">
-              Repeat Password
+              Ulangi Password
             </label>
             <label className="form-control-addon-within">
               <input
-                id="repeat_password"
+                {...register("ulangiPassword", { required: true })}
+                id="ulangiPassword"
                 type={password2Shown ? "text" : "password"}
                 className="form-control border-none"
-                value="12345"
               />
               <span className="flex items-center ltr:pr-4 rtl:pl-4">
                 <button
@@ -98,6 +168,10 @@ export default function Register() {
                 ></button>
               </span>
             </label>
+            <small className="block mt-2 invalid-feedback">
+              {errors.ulangiPassword?.type === "required" &&
+                "Field diatas tidak boleh kosong"}
+            </small>
           </div>
           <div className="flex">
             <button

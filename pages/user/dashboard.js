@@ -5,8 +5,7 @@ import { Store } from "../../utils/Store";
 
 export default function Dashboard() {
   const router = useRouter();
-  const { redirect } = router.query;
-  const { state, dispatch } = useContext(Store);
+  const { state } = useContext(Store);
   const { userInfo } = state;
 
   useEffect(() => {
@@ -74,12 +73,21 @@ export default function Dashboard() {
 
           {/* <!-- Summaries --> */}
           <div className="lg:flex mt-5 lg:-mx-4">
-            <div className="lg:w-1/3 lg:px-4">
+            <div className="lg:w-1/3 lg:px-4 lg:pt-0">
+              <div className="rrelative card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
+                <span className="text-primary text-5xl leading-none las las-address-book"></span>
+                <p className="mt-2">Status Pemilik</p>
+                <div className="badge badge_outlined badge_secondary uppercase mt-5">
+                  <div className="p-2 text-lg leading-none">Pendaftaran</div>
+                </div>
+              </div>
+            </div>
+            <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-industry"></span>
                 <p className="mt-2">Status Bangunan</p>
-                <div className="text-primary mt-5 text-3xl leading-none">
-                  Pendaftaran
+                <div className="badge badge_outlined badge_secondary uppercase mt-5">
+                  <div className="p-2 text-lg leading-none">Pendaftaran</div>
                 </div>
               </div>
             </div>
@@ -87,16 +95,7 @@ export default function Dashboard() {
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-receipt"></span>
                 <p className="mt-2">Pelaporan Pajak</p>
-                <div className="text-primary mt-5 text-3xl leading-none">0</div>
-              </div>
-            </div>
-            <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
-              <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
-                <span className="text-primary text-5xl leading-none las las-address-book"></span>
-                <p className="mt-2">Status Pemilik</p>
-                <div className="text-primary mt-5 text-3xl leading-none">
-                  Pendaftaran
-                </div>
+                <div className="p-2 text-2xl leading-none mt-5">0</div>
               </div>
             </div>
           </div>

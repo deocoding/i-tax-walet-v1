@@ -302,7 +302,7 @@ function TopBar({ title }) {
 
         {/* <!-- Register/Login --> */}
         <a
-          className="btn btn_primary uppercase ltr:ml-5 rtl:mr-5"
+          className="btn btn_primary uppercase ltr:ml-5 rtl:mr-5 cursor-pointer"
           onClick={() => router.push(aksi.linkAksi)}
         >
           {aksi.jdlAksi}

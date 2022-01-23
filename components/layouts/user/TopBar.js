@@ -1,6 +1,7 @@
 import Tippy from "@tippyjs/react";
 import Cookies from "js-cookie";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { Store } from "../../../utils/Store";
@@ -12,10 +13,20 @@ function TopBar() {
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
+  const [singkatan, setSingkatan] = useState("");
 
   useEffect(() => {
     setMounted(true);
 
+    const setAcronymName = (nama) => {
+      const ckpDua = nama.split(" ").slice(0, 2).join(" ");
+      const matches = ckpDua.match(/\b(\w)/g);
+      const singNama = matches.join("");
+      setSingkatan(singNama);
+    };
+    if (userInfo) {
+      setAcronymName(userInfo.namaLengkap);
+    }
     // console.log(userInfo);
   }, [userInfo]);
 
@@ -420,7 +431,19 @@ function TopBar() {
             }
           >
             <button className="flex items-center ltr:ml-4 rtl:mr-4 text-gray-700">
-              <span className="avatar">JD</span>
+              <span className="avatar">
+                {userInfo && userInfo.image ? (
+                  <Image
+                    src={userInfo.image}
+                    alt=""
+                    layout="fill"
+                    objectFit="fit"
+                    quality={30}
+                  />
+                ) : (
+                  <span className="uppercase">{singkatan}</span>
+                )}
+              </span>
             </button>
           </Tippy>
         </div>

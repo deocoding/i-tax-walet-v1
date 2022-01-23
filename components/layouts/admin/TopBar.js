@@ -1,14 +1,21 @@
 import Tippy from "@tippyjs/react";
+import Cookies from "js-cookie";
 import { useTheme } from "next-themes";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import React, { useContext, useEffect, useState } from "react";
+import { Store } from "../../../utils/Store";
 
 function TopBar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const router = useRouter();
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+
   useEffect(() => {
     setMounted(true);
-  }, []);
+  }, [userInfo]);
 
   const renderThemeChanger = () => {
     if (!mounted) return null;
@@ -261,6 +268,12 @@ function TopBar() {
       : (t.classList.add("menu-hidden"), o.classList.add("menu-hidden"));
   };
 
+  const logoutHandler = () => {
+    Cookies.remove("userInfo");
+    dispatch({ type: "USER_LOGOUT" });
+    router.push("/");
+  };
+
   return (
     <header className="top-bar">
       {/* <!-- Menu Toggler --> */}
@@ -385,8 +398,10 @@ function TopBar() {
               <span>
                 <div className="w-64">
                   <div className="p-5">
-                    <h5 className="uppercase">John Dode</h5>
-                    <p>Admin</p>
+                    <h5 className="uppercase">
+                      {userInfo && userInfo.namaLengkap}
+                    </h5>
+                    <p>{userInfo && userInfo.isAdmin ? "Admin" : "User"}</p>
                   </div>
                   <hr />
                   <div className="p-5">
@@ -401,7 +416,10 @@ function TopBar() {
                   </div>
                   <hr />
                   <div className="p-5">
-                    <a className="flex items-center text-gray-700 dark:text-gray-500 hover:text-primary dark:hover:text-primary cursor-pointer">
+                    <a
+                      className="flex items-center text-gray-700 dark:text-gray-500 hover:text-primary dark:hover:text-primary cursor-pointer"
+                      onClick={logoutHandler}
+                    >
                       <span className="las las-power-off text-2xl leading-none ltr:mr-2 rtl:ml-2"></span>
                       Logout
                     </a>

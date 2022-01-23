@@ -1,19 +1,24 @@
-import nc from "next-connect";
 import bcrypt from "bcryptjs";
+import nc from "next-connect";
 import User from "../../../models/User";
-// import Bangunan from "../../../models/Bangunan";
-import db from "../../../utils/db";
 import { signToken } from "../../../utils/auth";
+import db from "../../../utils/db";
 
 const handler = nc();
 
-handler.post(async (req, res) => {
+handler.put(async (req, res) => {
   await db.connect();
-  const user = await User.findOne({ email: req.body.email });
-  if (user && bcrypt.compareSync(req.body.password, user.password)) {
+  const user = await User.findById(req.body.userId);
+  if (user) {
+    user.namaLengkap = req.body.namaLengkap;
+    user.email = req.body.email;
+    user.hpTel = req.body.hpTel;
+    user.alamat.detail = req.body.alamatDetail;
+    user.alamat.kec = req.body.alamatKec;
+    user.alamat.kabKot = req.body.alamatKabKot;
+    await user.save();
     const token = signToken(user);
     const almt = user.alamat.detail ? "ok" : null;
-    // const bangunan = (await Bangunan.findOne({ user: user._id })) ? "ok" : null;
 
     await db.disconnect();
     res.send({
@@ -24,11 +29,12 @@ handler.post(async (req, res) => {
       isAdmin: user.isAdmin,
       alamat: almt,
       image: user.image,
+      pesan: "Data berhasil ditambahkan",
       // bangunan: bangunan,
     });
   } else {
-    res.status(401).send({ message: "Invalid email or password" });
     await db.disconnect();
+    res.status(404).send({ pesan: "User Not Found" });
   }
 });
 

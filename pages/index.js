@@ -2,8 +2,10 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import GuestLayout from "../components/layouts/guest/GuestLayout";
 import { Store } from "../utils/Store";
+import { getError } from "../utils/error";
 
 export default function Home() {
   const router = useRouter();
@@ -14,21 +16,17 @@ export default function Home() {
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState(false);
 
-  const togglePassword = () => {
-    setPasswordShown(!passwordShown);
-    setPasswordIcon(!passwordIcon);
-  };
-
-  useEffect(() => {
-    if (userInfo && userInfo.isAdmin) {
-      router.push("/admin/dashboard");
-    } else if (userInfo && !userInfo.isAdmin) {
-      router.push("/user/dashboard");
-    }
-  });
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useState(() => {
+    if (userInfo) {
+      if (userInfo.isAdmin) {
+        router.push(redirect || "/admin/dashboard");
+      }
+      router.push(redirect || "/user/dashboard");
+    }
+  });
 
   const loginHandler = async (e) => {
     e.preventDefault();
@@ -42,11 +40,21 @@ export default function Home() {
       Cookies.set("userInfo", JSON.stringify(data));
       if (data.isAdmin) {
         router.push("/admin/dashboard");
+      } else if (!data.isAdmin && !data.alamat) {
+        router.push("/user/detail");
+      } else if (!data.isAdmin && !data.bangunan) {
+        router.push("/user/bangunan_add");
+      } else {
+        router.push("/user/dashboard");
       }
-      alert("tes");
     } catch (err) {
-      alert(err.response.data ? err.response.data.message : err.message);
+      alert(getError(err));
     }
+  };
+
+  const togglePassword = () => {
+    setPasswordShown(!passwordShown);
+    setPasswordIcon(!passwordIcon);
   };
 
   return (
@@ -62,10 +70,9 @@ export default function Home() {
               Email
             </label>
             <input
-              autoFocus
-              id="email"
               type="email"
               className="form-control"
+              autoFocus={!0}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -75,7 +82,6 @@ export default function Home() {
             </label>
             <label className="form-control-addon-within">
               <input
-                id="password"
                 type={passwordShown ? "text" : "password"}
                 className="form-control border-none"
                 onChange={(e) => setPassword(e.target.value)}

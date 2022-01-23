@@ -1,7 +1,19 @@
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
 import AdminLayout from "../../components/layouts/admin/AdminLayout";
+import { Store } from "../../utils/Store";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (!userInfo) {
+      router.push("/");
+    }
+  });
+
   return (
     <AdminLayout title="Dashboard">
       {/* <!-- Breadcrumb --> */}
