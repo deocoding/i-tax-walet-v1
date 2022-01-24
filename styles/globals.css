@@ -2295,3 +2295,36 @@ button:focus {
 .aspect-h-3 {
   --tw-aspect-h: 3;
 }
+.collapse {
+  height: 0;
+  overflow-y: hidden;
+  opacity: 0;
+}
+.collapse.open {
+  height: auto;
+  overflow-y: auto;
+  opacity: 1;
+}
+.dropzone {
+  display: flex;
+  height: 10rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border-width: 2px;
+  border-style: dotted;
+  --tw-border-opacity: 1;
+  border-color: rgb(221 221 221 / var(--tw-border-opacity));
+  padding: 1.25rem;
+}
+.dropzone h3 {
+  text-align: center;
+}
+.dropzone:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(20 83 136 / var(--tw-border-opacity));
+}
+.dropzone:hover h3 {
+  --tw-text-opacity: 1;
+  color: rgb(20 83 136 / var(--tw-text-opacity));
+}

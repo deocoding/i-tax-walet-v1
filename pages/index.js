@@ -16,8 +16,12 @@ export default function Home() {
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+  } = useForm();
 
   useState(() => {
     if (userInfo) {
@@ -28,8 +32,7 @@ export default function Home() {
     }
   });
 
-  const loginHandler = async (e) => {
-    e.preventDefault();
+  const loginHandler = async ({ email, password }) => {
     try {
       const { data } = await axios.post("/api/users/login", {
         email,
@@ -64,7 +67,10 @@ export default function Home() {
           <h2 className="uppercase">Ingin masuk aplikasi?</h2>
           <h4 className="uppercase">Silahkan login</h4>
         </div>
-        <form className="card mt-5 p-5 md:p-10" onSubmit={loginHandler}>
+        <form
+          className="card mt-5 p-5 md:p-10"
+          onSubmit={handleSubmit(loginHandler)}
+        >
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="email">
               Email
@@ -73,8 +79,12 @@ export default function Home() {
               type="email"
               className="form-control"
               autoFocus={!0}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email", { required: true })}
             />
+            <small className="block my-2 invalid-feedback">
+              {errors.email?.type === "required" &&
+                "Field diatas tidak boleh kosong"}
+            </small>
           </div>
           <div className="mb-5">
             <label className="label block mb-2" htmlFor="password">
@@ -84,8 +94,9 @@ export default function Home() {
               <input
                 type={passwordShown ? "text" : "password"}
                 className="form-control border-none"
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password", { required: true })}
               />
+
               <span className="flex items-center ltr:pr-4 rtl:pl-4">
                 <button
                   type="button"
@@ -98,6 +109,10 @@ export default function Home() {
                 ></button>
               </span>
             </label>
+            <small className="block my-2 invalid-feedback">
+              {errors.password?.type === "required" &&
+                "Field diatas tidak boleh kosong"}
+            </small>
           </div>
           <div className="flex items-center">
             {/* <a href="auth-forgot-password.html" className="text-sm uppercase">
