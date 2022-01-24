@@ -4,6 +4,7 @@ import "../styles/skeleton.css";
 import "nprogress/nprogress.css";
 import "tippy.js/animations/shift-toward-extreme.css";
 import "tippy.js/animations/scale.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 import { ThemeProvider } from "next-themes";
 import { StoreProvider } from "../utils/Store";

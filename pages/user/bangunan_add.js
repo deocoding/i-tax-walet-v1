@@ -3,22 +3,124 @@ import { useContext, useEffect, useState } from "react";
 import { VisitorsChart } from "../../components/charts/VisitorsChart.tsx";
 import UserLayout from "../../components/layouts/user/UserLayout";
 import { Store } from "../../utils/Store";
+import ReactMapGL, {
+  Marker,
+  Popup,
+  FullscreenControl,
+  GeolocateControl,
+} from "react-map-gl";
+import Moment from "react-moment";
+import "moment/locale/id";
+import { getError } from "../../utils/error";
+import axios from "axios";
+import dynamic from "next/dynamic";
 
-export default function UserBangunanAdd() {
+function UserBangunanAdd() {
   const router = useRouter();
-  const { redirect } = router.query;
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
-  const [toggleState, setToggleState] = useState(1);
+
+  const [bangunans, setBangunans] = useState([]);
+  const [currentPlaceId, setCurrentPlaceId] = useState(null);
+  const [newPlace, setNewPlace] = useState(null);
+
+  const [alamat, setAlamat] = useState("");
+  const [kec, setKec] = useState("");
+  const [kabKot, setKabKot] = useState("");
+  const [tipe, setTipe] = useState("");
+  const [jumLan, setJumLan] = useState(null);
+  const [jumBur, setJumBur] = useState(null);
+  const [simb, setSimb] = useState("");
+  const [situ, setSitu] = useState("");
+  const [lat, setLat] = useState("");
+  const [long, setLong] = useState("");
+
+  const geolocateStyle = {
+    top: 0,
+    left: 0,
+    padding: "10px",
+  };
+
+  const fullscreenControlStyle = {
+    top: 36,
+    left: 0,
+    padding: "10px",
+  };
+
+  const [viewport, setViewport] = useState({
+    width: "-webkit-calc(100% - 5.5rem)",
+    height: "65vh",
+    latitude: -2.2074,
+    longitude: 113.9164,
+    zoom: 13,
+  });
 
   useEffect(() => {
     if (!userInfo) {
       router.push("/");
-    }
-  });
+    } else {
+      const fetchBangunans = async () => {
+        try {
+          const res = await axios.get("/api/bangunans/", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setBangunans(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      const fetchLokAkhir = async () => {
+        try {
+          const res = await axios.get("/api/bangunans/last", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          if (res) {
+            setViewport({
+              ...viewport,
+              latitude: Number(res.data.latAkhir),
+              longitude: Number(res.data.longAkhir),
+            });
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
 
-  const toggleTab = (index) => {
-    setToggleState(index);
+      fetchBangunans();
+      fetchLokAkhir();
+    }
+  }, []);
+
+  const handleMarkerClick = (id, lat, long) => {
+    setCurrentPlaceId(id);
+    setViewport({ ...viewport, latitude: lat, longitude: long });
+  };
+
+  const handleAddClick = (e) => {
+    const [long, lat] = e.lngLat;
+    setNewPlace({
+      lat,
+      long,
+    });
+    setLat(lat);
+    setLong(long);
+  };
+
+  const bangunansHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(
+        "/api/bangunans",
+        { alamat, kec, kabKot, tipe, jumLan, jumBur, simb, situ, lat, long },
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      // Cookies.set("userInfo", data);
+      // return router.reload();
+    } catch (err) {
+      alert(getError(err));
+    }
   };
 
   return (
@@ -41,48 +143,415 @@ export default function UserBangunanAdd() {
           <div className="card p-5">
             <div className="tabs">
               <nav className="tab-nav">
-                <button
-                  className={
-                    toggleState === 1
-                      ? "nav-link h5 uppercase active"
-                      : "nav-link h5 uppercase"
-                  }
-                  onClick={() => toggleTab(1)}
-                >
+                <button className="nav-link h5 uppercase active">
                   Peta Lokasi
-                </button>
-                <button
-                  className={
-                    toggleState === 2
-                      ? "nav-link h5 uppercase active"
-                      : "nav-link h5 uppercase"
-                  }
-                  onClick={() => toggleTab(2)}
-                >
-                  Potensi
                 </button>
               </nav>
               <div className="tab-content mt-5">
                 <div
                   id="tab-1"
-                  className={toggleState === 1 ? "collapse open" : "collapse"}
+                  className="collapse open"
+                  style={{
+                    width: "calc(100%)",
+                    height: "calc(65vh)",
+                  }}
                 >
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Commodi veritatis officiis, quidem placeat autem nihil
-                  voluptatem velit quaerat adipisci veniam iste. Quae odio sint
-                  dolorum aliquid eos numquam est ducimus! Lorem ipsum dolor,
-                  sit amet consectetur adipisicing elit. Itaque enim alias odit
-                  facilis, necessitatibus quam nulla! Sapiente nostrum nulla ut,
-                  aspernatur nisi unde enim quas ipsam laudantium excepturi vel
-                  consequuntur.
-                </div>
-                <div
-                  id="tab-2"
-                  className={toggleState === 2 ? "collapse open" : "collapse"}
-                >
-                  <div className="mt-5">
-                    <VisitorsChart />
-                  </div>
+                  <ReactMapGL
+                    {...viewport}
+                    mapboxApiAccessToken={
+                      process.env.NEXT_PUBLIC_MAPBOX_API_KEY
+                    }
+                    onViewportChange={(nextViewport) =>
+                      setViewport(nextViewport)
+                    }
+                    mapStyle="mapbox://styles/deocoding/ckyes3rpu0tch14nwh4xw3g2g"
+                    onDblClick={handleAddClick}
+                    transitionDuration={250}
+                  >
+                    {bangunans &&
+                      bangunans.map((bangunan) => (
+                        <span key={bangunan._id}>
+                          <Marker
+                            latitude={JSON.parse(bangunan.lat)}
+                            longitude={JSON.parse(bangunan.long)}
+                            offsetLeft={-30}
+                            offsetTop={-30}
+                          >
+                            {bangunan.status === 1 && (
+                              <span>
+                                <i
+                                  className="las las-map-pin"
+                                  style={{
+                                    fontSize: viewport.zoom * 4,
+                                    color: "darkcyan",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleMarkerClick(
+                                      bangunan._id,
+                                      JSON.parse(bangunan.lat),
+                                      JSON.parse(bangunan.long)
+                                    )
+                                  }
+                                ></i>
+                              </span>
+                            )}
+                            {bangunan.status === 2 && (
+                              <span>
+                                <i
+                                  className="las las-map-pin"
+                                  style={{
+                                    fontSize: viewport.zoom * 4,
+                                    color: "darkgoldenrod",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleMarkerClick(
+                                      bangunan._id,
+                                      JSON.parse(bangunan.lat),
+                                      JSON.parse(bangunan.long)
+                                    )
+                                  }
+                                ></i>
+                              </span>
+                            )}
+                            {bangunan.status === 3 && (
+                              <i
+                                className="las las-map-pin"
+                                style={{
+                                  fontSize: viewport.zoom * 4,
+                                  color: "darkblue",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() =>
+                                  handleMarkerClick(
+                                    bangunan._id,
+                                    JSON.parse(bangunan.lat),
+                                    JSON.parse(bangunan.long)
+                                  )
+                                }
+                              ></i>
+                            )}
+                          </Marker>
+                          {bangunan._id === currentPlaceId && (
+                            <Popup
+                              latitude={JSON.parse(bangunan.lat)}
+                              longitude={JSON.parse(bangunan.long)}
+                              closeButton={true}
+                              closeOnClick={false}
+                              anchor="left"
+                              onClose={() => setCurrentPlaceId(null)}
+                            >
+                              <div className="flex justify-center">
+                                <div className="block rounded-lg shadow-lg bg-white max-w-sm text-center">
+                                  <div className="py-3 px-6 border-b border-gray-300">
+                                    Bangunan {bangunan.tipe}{" "}
+                                    <i className="las las-check"></i>
+                                  </div>
+                                  <div className="p-6">
+                                    <h5 className="text-gray-900 text-xl font-medium mb-2">
+                                      {bangunan.jumLan} lantai,{" "}
+                                      {bangunan.jumBur} burung
+                                    </h5>
+                                    <p className="text-gray-700 text-base mb-4">
+                                      {bangunan.alamat +
+                                        ", Kecamatan " +
+                                        bangunan.kec +
+                                        " " +
+                                        bangunan.kabKot}
+                                    </p>
+                                  </div>
+                                  <div className="py-3 px-6 border-t border-gray-300 text-gray-600">
+                                    <Moment fromNow locale="id">
+                                      {bangunan.updatedAt}
+                                    </Moment>
+                                  </div>
+                                </div>
+                              </div>
+                            </Popup>
+                          )}
+                        </span>
+                      ))}
+                    {newPlace && (
+                      <Popup
+                        latitude={newPlace.lat}
+                        longitude={newPlace.long}
+                        closeButton={true}
+                        closeOnClick={false}
+                        anchor="left"
+                        onClose={() => setNewPlace(null)}
+                      >
+                        <div className="block p-6 rounded-lg shadow-lg bg-white max-w-md">
+                          <div className="pb-2 uppercase font-bold">
+                            Tambah Bangunan
+                          </div>
+                          <form onSubmit={bangunansHandler}>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="form-group mb-3">
+                                <input
+                                  type="text"
+                                  className="form-control
+          block
+          w-full
+          px-3
+          py-1.5
+          text-base
+          font-normal
+          text-gray-700
+          bg-white bg-clip-padding
+          border border-solid border-gray-300
+          rounded
+          transition
+          ease-in-out
+          m-0
+          focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                  id="exampleInput123"
+                                  aria-describedby="emailHelp123"
+                                  placeholder="Longitude"
+                                  defaultValue={newPlace.long}
+                                  onChange={(e) => setLong(e.target.value)}
+                                />
+                              </div>
+                              <div className="form-group mb-3">
+                                <input
+                                  type="text"
+                                  className="form-control
+          block
+          w-full
+          px-3
+          py-1.5
+          text-base
+          font-normal
+          text-gray-700
+          bg-white bg-clip-padding
+          border border-solid border-gray-300
+          rounded
+          transition
+          ease-in-out
+          m-0
+          focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                  id="exampleInput124"
+                                  aria-describedby="emailHelp124"
+                                  placeholder="Latitude"
+                                  defaultValue={newPlace.lat}
+                                  onChange={(e) => setLat(e.target.value)}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                autoFocus
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="Alamat lengkap"
+                                onChange={(e) => setAlamat(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="Kecamatan"
+                                onChange={(e) => setKec(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="Kabupaten/Kota"
+                                onChange={(e) => setKabKot(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <select
+                                className="form-select appearance-none
+      block
+      w-full
+      px-3
+      py-1.5
+      text-base
+      font-normal
+      text-gray-700
+      bg-white bg-clip-padding bg-no-repeat
+      border border-solid border-gray-300
+      rounded
+      transition
+      ease-in-out
+      m-0
+      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                aria-label="Default select example"
+                                onChange={(e) => setTipe(e.target.value)}
+                              >
+                                <option defaultValue>Tipe bangunan</option>
+                                <option value="Permanen">Permanen</option>
+                                <option value="Semi Permanen">
+                                  Semi Permanen
+                                </option>
+                                <option value="Darurat">Darurat</option>
+                              </select>
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="Jumlah Lantai"
+                                onChange={(e) => setJumLan(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="Banyak Burung"
+                                onChange={(e) => setJumBur(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="No. SIMB"
+                                onChange={(e) => setSimb(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <input
+                                type="text"
+                                className="form-control block
+        w-full
+        px-3
+        py-1.5
+        text-base
+        font-normal
+        text-gray-700
+        bg-white bg-clip-padding
+        border border-solid border-gray-300
+        rounded
+        transition
+        ease-in-out
+        m-0
+        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                                id="exampleInput125"
+                                placeholder="No. SITU"
+                                onChange={(e) => setSitu(e.target.value)}
+                              />
+                            </div>
+                            <button
+                              type="submit"
+                              className="
+      w-full
+      px-6
+      py-2.5
+      bg-blue-600
+      text-white
+      font-medium
+      text-xs
+      leading-tight
+      uppercase
+      rounded
+      shadow-md
+      hover:bg-blue-700 hover:shadow-lg
+      focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0
+      active:bg-blue-800 active:shadow-lg
+      transition
+      duration-150
+      ease-in-out"
+                            >
+                              Ajukan Bangunan Baru
+                            </button>
+                          </form>
+                        </div>
+                      </Popup>
+                    )}
+                    <GeolocateControl style={geolocateStyle} />
+                    <FullscreenControl style={fullscreenControlStyle} />
+                  </ReactMapGL>
                 </div>
               </div>
             </div>
@@ -99,141 +568,20 @@ export default function UserBangunanAdd() {
               <div className="p-2 text-2xl leading-none">Pendaftaran</div>
             </div>
           </div>
-          <div className="relative mt-5 card p-5">
-            <h3>Detail Alamat</h3>
-            <form className="mt-5">
-              <div className="flex items-center">
-                <div className="w-1/4">
-                  <label className="label block">Alamat Lengkap</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="alamatLengkap"
-                      type="text"
-                      className="form-control"
-                    />
+          <div className="card p-5 mt-5">
+            <div className="tabs">
+              <nav className="tab-nav">
+                <button className="nav-link h5 uppercase active">
+                  Potensi
+                </button>
+              </nav>
+              <div className="tab-content mt-5">
+                <div id="tab-2" className="collapse open">
+                  <div className="mt-5">
+                    <VisitorsChart />
                   </div>
                 </div>
               </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">Kecamatan</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="kecamatan"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">Kabupaten/ Kota</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="kabupatenkota"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">Latitude</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input id="latitude" type="text" className="form-control" />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">Longitude</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="longitude"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          <div className="relative mt-5 card p-5">
-            <h3>Detail Bangunan</h3>
-            <form className="mt-5">
-              <div className="flex items-center">
-                <div className="w-1/4">
-                  <label className="label block">Tipe</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <select className="form-control">
-                      <option>Permanen</option>
-                      <option>Semi Permanen</option>
-                    </select>
-                    <div className="custom-select-icon las las-caret-down"></div>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">Banyak Lantai</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="longitude"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">No. SIMB</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="longitude"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center mt-5">
-                <div className="w-1/4">
-                  <label className="label block">No. SITU</label>
-                </div>
-                <div className="w-3/4 ml-2">
-                  <div className="custom-select">
-                    <input
-                      id="longitude"
-                      type="text"
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
-            <div className="mt-5 flex items-center">
-              <button className="w-1/2 btn btn_primary mt-5 ltr:mr-2 rtl:ml-2 uppercase">
-                Ajukan Pendataan
-              </button>
             </div>
           </div>
           <div className="card mt-5 p-5">
@@ -247,3 +595,5 @@ export default function UserBangunanAdd() {
     </UserLayout>
   );
 }
+
+export default dynamic(() => Promise.resolve(UserBangunanAdd), { ssr: false });

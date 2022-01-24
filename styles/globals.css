@@ -2328,3 +2328,43 @@ button:focus {
   --tw-text-opacity: 1;
   color: rgb(20 83 136 / var(--tw-text-opacity));
 }
+.mapboxgl-popup {
+  max-width: 350px;
+}
+
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#info {
+  display: table;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: 10px;
+  margin-left: 10px;
+  word-wrap: anywhere;
+  white-space: pre-wrap;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+  text-align: center;
+  color: #222;
+  background: #fff;
+}
+
+#info::before {
+  display: none;
+}
+
+.label {
+  margin: 3px 0;
+}
+
+.mapboxgl-popup-close-button {
+  margin-right: 5px;
+  background: #fff !important;
+}
