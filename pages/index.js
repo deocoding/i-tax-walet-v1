@@ -46,7 +46,7 @@ export default function Home() {
       } else if (!data.isAdmin && !data.alamat) {
         router.push("/user/detail");
       } else if (!data.isAdmin && !data.bangunan) {
-        router.push("/user/bangunan_add");
+        router.push("/user/bangunan");
       } else {
         router.push("/user/dashboard");
       }

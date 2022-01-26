@@ -3,7 +3,7 @@ import AdminLayout from "../../components/layouts/admin/AdminLayout";
 
 export default function PajakAdd() {
   return (
-    <AdminLayout title="User">
+    <AdminLayout title="Pajak">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb">
         <h1>Pajak</h1>

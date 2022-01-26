@@ -75,7 +75,6 @@ function MenuBar({ title }) {
         </Link>
         <Link href="/user/detail" passHref>
           <a
-            href="#no-link"
             className={title === "User Detail" ? "link active" : "link"}
             data-target="[data-menu=pages]"
             data-toggle="tooltip-menu"
@@ -87,7 +86,6 @@ function MenuBar({ title }) {
         </Link>
         <Link href="/user/bangunan" passHref>
           <a
-            href="#no-link"
             className={title === "Bangunan" ? "link active" : "link"}
             data-target="[data-menu=applications]"
             data-toggle="tooltip-menu"
@@ -97,16 +95,18 @@ function MenuBar({ title }) {
             <span className="title">Bangunan</span>
           </a>
         </Link>
-        <a
-          href="#no-link"
-          className="link"
-          data-target="[data-menu=ui]"
-          data-toggle="tooltip-menu"
-          data-tippy-content="UI"
-        >
-          <span className="icon las las-file-invoice"></span>
-          <span className="title">Pajak</span>
-        </a>
+
+        <Link href="/user/pajak" passHref>
+          <a
+            className={title === "Pajak" ? "link active" : "link"}
+            data-target="[data-menu=ui]"
+            data-toggle="tooltip-menu"
+            data-tippy-content="UI"
+          >
+            <span className="icon las las-file-invoice"></span>
+            <span className="title">Pajak</span>
+          </a>
+        </Link>
       </div>
     </aside>
   );

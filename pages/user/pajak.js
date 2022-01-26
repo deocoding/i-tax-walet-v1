@@ -1,20 +1,33 @@
 import Link from "next/link";
-import { useState } from "react";
-import AdminLayout from "../../components/layouts/admin/AdminLayout";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
+import UserLayout from "../../components/layouts/user/UserLayout";
+import { Store } from "../../utils/Store";
 
-export default function BangunanList() {
+export default function UserBangunan() {
+  const router = useRouter();
+  const { redirect } = router.query;
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (!userInfo) {
+      router.push("/");
+    }
+  });
+
   return (
-    <AdminLayout title="Bangunan">
+    <UserLayout title="Pajak">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb lg:flex items-start">
         <div>
-          <h1>Bangunan</h1>
+          <h1>Pajak</h1>
           <ul>
             <li>
-              <a href="#">Admin</a>
+              <a href="#">User</a>
             </li>
             <li className="divider las las-arrow-right"></li>
-            <li>Daftar Bangunan</li>
+            <li>Daftar Pajak</li>
           </ul>
         </div>
 
@@ -77,7 +90,7 @@ export default function BangunanList() {
             </div>
 
             {/* <!-- Add New --> */}
-            <Link href="/admin/bangunan_add" passHref>
+            <Link href="/user/pajak_add" passHref>
               <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
                 Tambah Baru
               </button>
@@ -99,12 +112,13 @@ export default function BangunanList() {
                   </label>
                 </th>
                 <th className="w-1/5 ltr:text-left rtl:text-right uppercase">
-                  Alamat Lengkap
+                  Volume/Tonase
                 </th>
-                <th className="text-center uppercase">Pemilik</th>
-                <th className="text-center uppercase">NPWPD</th>
-                <th className="text-center uppercase">Potensi</th>
-                <th className="text-center uppercase">Pendataan Terakhir</th>
+                <th className="text-center uppercase">Nilai Jual</th>
+                <th className="text-center uppercase">Total Jual</th>
+                <th className="text-center uppercase">10% Pajak</th>
+                <th className="text-center uppercase">Batas Pembayaran</th>
+                <th className="text-center uppercase">Status</th>
                 <th className="uppercase"></th>
               </tr>
             </thead>
@@ -116,20 +130,26 @@ export default function BangunanList() {
                     <span></span>
                   </label>
                 </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_danger uppercase">
-                    <i className="las las-level-down-alt"></i>10%
-                  </div>
-                </td>
+                <td>10 Kg</td>
+                <td className="text-center">Rp3.000.000</td>
+                <td className="text-center">Rp30.000.000</td>
+                <td className="text-center">Rp3.000.000</td>
                 <td className="text-center">December 15, 2019</td>
+                <td className="text-center">
+                  <div className="badge badge_danger uppercase">Denda</div>
+                </td>
                 <td className="ltr:text-right rtl:text-left whitespace-nowrap">
                   <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_success"
+                    >
+                      <span className="las las-money-bill"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
+                    >
                       <span className="las las-info-circle"></span>
                     </a>
                     <a
@@ -154,20 +174,26 @@ export default function BangunanList() {
                     <span></span>
                   </label>
                 </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_outlined badge_info uppercase">
-                    <i className="las las-long-arrow-alt-right"></i>0%
-                  </div>
-                </td>
+                <td>10 Kg</td>
+                <td className="text-center">Rp3.000.000</td>
+                <td className="text-center">Rp30.000.000</td>
+                <td className="text-center">Rp3.000.000</td>
                 <td className="text-center">December 15, 2019</td>
+                <td className="text-center">
+                  <div className="badge badge_warning uppercase">Kurang</div>
+                </td>
                 <td className="ltr:text-right rtl:text-left whitespace-nowrap">
                   <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_success"
+                    >
+                      <span className="las las-money-bill"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
+                    >
                       <span className="las las-info-circle"></span>
                     </a>
                     <a
@@ -192,20 +218,70 @@ export default function BangunanList() {
                     <span></span>
                   </label>
                 </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_outlined badge_success uppercase">
-                    <i className="las las-level-up-alt"></i>24%
-                  </div>
-                </td>
+                <td>10 Kg</td>
+                <td className="text-center">Rp3.000.000</td>
+                <td className="text-center">Rp30.000.000</td>
+                <td className="text-center">Rp3.000.000</td>
                 <td className="text-center">December 15, 2019</td>
+                <td className="text-center">
+                  <div className="badge badge_info uppercase">Proses</div>
+                </td>
                 <td className="ltr:text-right rtl:text-left whitespace-nowrap">
                   <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_success"
+                    >
+                      <span className="las las-money-bill"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
+                    >
+                      <span className="las las-info-circle"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+                    >
+                      <span className="las las-pen-fancy"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
+                    >
+                      <span className="las las-trash-alt"></span>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label className="custom-checkbox">
+                    <input type="checkbox" data-toggle="rowSelection" />
+                    <span></span>
+                  </label>
+                </td>
+                <td>10 Kg</td>
+                <td className="text-center">Rp3.000.000</td>
+                <td className="text-center">Rp30.000.000</td>
+                <td className="text-center">Rp3.000.000</td>
+                <td className="text-center">December 15, 2019</td>
+                <td className="text-center">
+                  <div className="badge badge_success uppercase">Dibayar</div>
+                </td>
+                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
+                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_success"
+                    >
+                      <span className="las las-money-bill"></span>
+                    </a>
+                    <a
+                      href="#"
+                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
+                    >
                       <span className="las las-info-circle"></span>
                     </a>
                     <a
@@ -315,6 +391,6 @@ export default function BangunanList() {
           </button>
         </div>
       </div>
-    </AdminLayout>
+    </UserLayout>
   );
 }

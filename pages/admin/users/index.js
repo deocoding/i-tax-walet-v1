@@ -2,10 +2,11 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import AdminLayout from "../../components/layouts/admin/AdminLayout";
-import { Store } from "../../utils/Store";
+import AdminLayout from "../../../components/layouts/admin/AdminLayout";
+import { Store } from "../../../utils/Store";
 import Moment from "react-moment";
 import "moment/locale/id";
+import { getError } from "../../../utils/error";
 
 export default function UserLists() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function UserLists() {
     } else {
       const fetchUsers = async () => {
         try {
-          const res = await axios.get("/api/admin/users/", {
+          const res = await axios.get("/api/admin/users", {
             headers: { authorization: `Bearer ${userInfo.token}` },
           });
           setUsers(res.data);
@@ -31,6 +32,21 @@ export default function UserLists() {
       fetchUsers();
     }
   }, []);
+
+  const deleteHandler = async (userId) => {
+    if (!window.confirm("Yakin dihapus?")) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/admin/users/${userId}`, {
+        headers: { authorization: `Bearer ${userInfo.token}` },
+      });
+      router.reload();
+    } catch (err) {
+      alert(getError(err));
+    }
+  };
+
   return (
     <AdminLayout title="User">
       {/* <!-- Breadcrumb --> */}
@@ -105,7 +121,7 @@ export default function UserLists() {
             </div>
 
             {/* <!-- Add New --> */}
-            <Link href="/admin/user_add" passHref>
+            <Link href="/admin/users/add" passHref>
               <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
                 Tambah Baru
               </button>
@@ -177,14 +193,13 @@ export default function UserLists() {
                     </td>
                     <td className="ltr:text-right rtl:text-left whitespace-nowrap">
                       <div className="inline-flex ltr:ml-auto rtl:mr-auto">
+                        <Link href={`/admin/users/${user._id}`} passHref>
+                          <a className="btn btn-icon btn_outlined btn_secondary">
+                            <span className="las las-pen-fancy"></span>
+                          </a>
+                        </Link>
                         <a
-                          href="#"
-                          className="btn btn-icon btn_outlined btn_secondary"
-                        >
-                          <span className="las las-pen-fancy"></span>
-                        </a>
-                        <a
-                          href="#"
+                          onClick={() => deleteHandler(user._id)}
                           className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
                         >
                           <span className="las las-trash-alt"></span>

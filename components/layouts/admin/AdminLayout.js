@@ -18,8 +18,8 @@ function AdminLayout({ title, description, children }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <TopBar />
-      <MenuBar />
-      <main className="workspace overflow-hidden">
+      <MenuBar title={title} />
+      <main className="workspace overflow-hidden" title={title}>
         {children}
         <div className="mt-auto">
           <Footer />

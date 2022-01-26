@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useState } from "react";
 import AdminLayout from "../../components/layouts/admin/AdminLayout";
 
@@ -76,9 +77,11 @@ export default function TargetList() {
             </div>
 
             {/* <!-- Add New --> */}
-            <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-              Tambah Baru
-            </button>
+            <Link href="/admin/target_add" passHref>
+              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
+                Tambah Baru
+              </button>
+            </Link>
           </div>
         </div>
       </section>

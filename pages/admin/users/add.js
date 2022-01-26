@@ -2,14 +2,15 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import UserLayout from "../../components/layouts/user/UserLayout";
-import { Store } from "../../utils/Store";
-import { getError } from "../../utils/error";
-import SkeletonUbahPass from "../../components/skeletons/SkeletonUbahPass";
+import AdminLayout from "../../../../components/layouts/admin/AdminLayout";
+import { Store } from "../../../../utils/Store";
+import { getError } from "../../../../utils/error";
+import SkeletonUbahPass from "../../../../components/skeletons/SkeletonUbahPass";
 import Image from "next/image";
 import Cookies from "js-cookie";
 
-export default function UserDetail() {
+export default function UserDetail({ params }) {
+  const userId = params.id;
   const router = useRouter();
   const { redirect } = router.query;
   const { state, dispatch } = useContext(Store);
@@ -37,6 +38,13 @@ export default function UserDetail() {
     setValue: setValue3,
   } = useForm();
 
+  const {
+    register: register4,
+    formState: { errors: errors4 },
+    handleSubmit: handleSubmit4,
+    setValue: setValue4,
+  } = useForm();
+
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordIcon, setPasswordIcon] = useState(false);
 
@@ -52,32 +60,19 @@ export default function UserDetail() {
   useEffect(() => {
     if (!userInfo) {
       router.push("/");
-    } else {
-      const fetchUser = async () => {
-        try {
-          const { data } = await axios.get(`/api/users/${userInfo._id}`, {
-            headers: { authorization: `Bearer ${userInfo.token}` },
-          });
-          if (data) {
-            setUser(data);
-            if (data.image) {
-              setGambarProfile(data.image);
-              setBtnHapusGambar(true);
-            }
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      };
-      fetchUser();
     }
   }, []);
 
   const [loading, setLoading] = useState(false);
   const [pesan, setPesan] = useState("");
 
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [pesanStatus, setPesanStatus] = useState("");
+  const [statusUser, setStatusUser] = useState();
+
   setValue2("userId", user._id);
 
+  setValue4("userId", user._id);
   setValue3("userId", user._id);
   setValue3("email", user.email);
   setValue3("namaLengkap", user.namaLengkap);
@@ -88,6 +83,8 @@ export default function UserDetail() {
     setValue3("alamatDetail", user.alamat.detail);
     setValue3("alamatKec", user.alamat.kec);
   }
+
+  setValue4("status", user.status);
 
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [pesanDetail, setPesanDetail] = useState("");
@@ -103,9 +100,6 @@ export default function UserDetail() {
         gambar,
       });
       if (data) {
-        dispatch({ type: "USER_LOGIN", payload: data });
-
-        Cookies.set("userInfo", JSON.stringify(data));
         setPesanImage(data.pesan);
         setLoadingImage(false);
         setTimeout(async () => {
@@ -205,6 +199,25 @@ export default function UserDetail() {
     }
   };
 
+  const ubahStatusHandler = async ({ userId, status }) => {
+    try {
+      setLoadingStatus(true);
+      const { data } = await axios.put(`/api/users/status`, { userId, status });
+      if (data) {
+        setPesanStatus(data.pesan);
+        setLoadingStatus(false);
+        setTimeout(async () => {
+          setPesanStatus("");
+          setStatusUser(data.status);
+          setValue4("status", data.status);
+        }, 1500);
+      }
+    } catch (err) {
+      getError(err);
+      setLoadingStatus(false);
+    }
+  };
+
   async function hapusGambarHandler(namaFile, userId) {
     try {
       setLoadingImage(true);
@@ -230,16 +243,18 @@ export default function UserDetail() {
   }
 
   return (
-    <UserLayout title="User Detail">
+    <AdminLayout title="User">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb">
         <h1>User Detail</h1>
         <ul>
           <li>
-            <span>User</span>
+            <span>Admin</span>
           </li>
           <li className="divider las las-arrow-right"></li>
-          <li>Detail</li>
+          <li>user id</li>
+          <li className="divider las las-arrow-right"></li>
+          <li>{userId}</li>
         </ul>
       </section>
 
@@ -367,10 +382,86 @@ export default function UserDetail() {
           <div className="relative card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
             <span className="text-primary text-6xl leading-none las las-address-book"></span>
             <p className="mt-2 text-xl">Status Pemilik</p>
-            <div className="badge badge_outlined badge_secondary uppercase mt-5">
-              <div className="p-2 text-2xl leading-none">Pendaftaran</div>
-            </div>
+            {statusUser === 1 && (
+              <div className="badge badge_outlined badge_secondary uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Pendaftaran</div>
+              </div>
+            )}
+            {statusUser === 2 && (
+              <div className="badge badge_outlined badge_info uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Pendataan</div>
+              </div>
+            )}
+            {statusUser === 3 && (
+              <div className="badge badge_outlined badge_success uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Valid</div>
+              </div>
+            )}
           </div>
+
+          {loadingStatus ? (
+            <div className="relative card p-5 mt-5 overflow-hidden">
+              <SkeletonUbahPass />
+            </div>
+          ) : (
+            <div className="relative card p-5 mt-5 overflow-hidden">
+              <h3>Ubah Status</h3>
+              <form onSubmit={handleSubmit4(ubahStatusHandler)}>
+                <div className="custom-select mt-3">
+                  <select
+                    className="form-control"
+                    {...register4("status", { required: true })}
+                  >
+                    <option value={1}>Pendaftaran</option>
+                    <option value={2}>Pendataan</option>
+                    <option value={3}>Valid</option>
+                  </select>
+                  <div className="custom-select-icon las las-caret-down"></div>
+                </div>
+                <div className="mt-5 flex items-center">
+                  <button
+                    className="btn btn_primary ltr:mr-2 rtl:ml-2 uppercase"
+                    type="submit"
+                  >
+                    Simpan
+                  </button>
+                  {pesanStatus && (
+                    <svg
+                      className="animate-bounce"
+                      fill="none"
+                      height="26"
+                      viewBox="0 0 26 26"
+                      width="26"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M8.5 14L11.1 16.6"
+                        stroke="#4F4F4F"
+                        strokeLinecap="round"
+                        strokeMiterlimit="10"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18.2 10L11.6 16.6"
+                        stroke="#4F4F4F"
+                        strokeLinecap="round"
+                        strokeMiterlimit="10"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M13 25C19.6274 25 25 19.6274 25 13C25 6.37258 19.6274 1 13 1C6.37258 1 1 6.37258 1 13C1 19.6274 6.37258 25 13 25Z"
+                        stroke="#4F4F4F"
+                        strokeLinecap="round"
+                        strokeMiterlimit="10"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </form>
+            </div>
+          )}
+
           <div className="mt-5 card card_column">
             <div className="image">
               {gambarProfile && (
@@ -589,6 +680,10 @@ export default function UserDetail() {
           )}
         </div>
       </div>
-    </UserLayout>
+    </AdminLayout>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  return { props: { params } };
 }

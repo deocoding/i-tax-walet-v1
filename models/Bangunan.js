@@ -5,7 +5,7 @@ const bangunanSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     alamat: { type: String, required: true },
     kec: { type: String, required: true },
-    kabKot: { type: String, required: true },
+    kabKot: { type: String, required: true, default: "Kota Palangka Raya" },
     lat: { type: String, required: true },
     long: { type: String, required: true },
     tipe: { type: String },

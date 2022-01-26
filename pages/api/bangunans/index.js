@@ -23,14 +23,9 @@ handler.post(async (req, res) => {
     user: req.user._id,
     alamat: req.body.alamat,
     kec: req.body.kec,
-    kabKot: req.body.kabKot,
     lat: req.body.lat,
     long: req.body.long,
     tipe: req.body.tipe,
-    jumLan: req.body.jumLan,
-    jumBur: req.body.jumBur,
-    imb: req.body.simb,
-    itu: req.body.situ,
   });
 
   const bangunan = await newBangunan.save();

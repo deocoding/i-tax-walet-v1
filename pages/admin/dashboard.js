@@ -21,7 +21,7 @@ export default function Dashboard() {
         <h1>Dashboard</h1>
         <ul>
           <li>
-            <a href="#">Login</a>
+            <a href="#">Admin</a>
           </li>
           <li className="divider las las-arrow-right"></li>
           <li>Dashboard</li>

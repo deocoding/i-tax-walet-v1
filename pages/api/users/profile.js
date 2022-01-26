@@ -15,7 +15,6 @@ handler.put(async (req, res) => {
     user.hpTel = req.body.hpTel;
     user.alamat.detail = req.body.alamatDetail;
     user.alamat.kec = req.body.alamatKec;
-    user.alamat.kabKot = req.body.alamatKabKot;
     await user.save();
     const token = signToken(user);
     const almt = user.alamat.detail ? "ok" : null;

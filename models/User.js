@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
     alamat: {
       detail: { type: String },
       kec: { type: String },
-      kabKot: { type: String },
+      kabKot: { type: String, default: "Kota Palangka Raya" },
     },
     status: { type: Number, required: true, default: 1 },
   },

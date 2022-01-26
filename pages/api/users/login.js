@@ -1,7 +1,7 @@
 import nc from "next-connect";
 import bcrypt from "bcryptjs";
 import User from "../../../models/User";
-// import Bangunan from "../../../models/Bangunan";
+import Bangunan from "../../../models/Bangunan";
 import db from "../../../utils/db";
 import { signToken } from "../../../utils/auth";
 
@@ -13,7 +13,7 @@ handler.post(async (req, res) => {
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
     const token = signToken(user);
     const almt = user.alamat.detail ? "ok" : null;
-    // const bangunan = (await Bangunan.findOne({ user: user._id })) ? "ok" : null;
+    const bangunan = (await Bangunan.findOne({ user: user._id })) ? "ok" : null;
 
     await db.disconnect();
     res.send({
@@ -24,7 +24,7 @@ handler.post(async (req, res) => {
       isAdmin: user.isAdmin,
       alamat: almt,
       image: user.image,
-      // bangunan: bangunan,
+      bangunan: bangunan,
     });
   } else {
     res.status(401).send({ message: "Invalid email or password" });
