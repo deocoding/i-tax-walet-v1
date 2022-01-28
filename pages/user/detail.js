@@ -314,12 +314,20 @@ export default function UserDetail() {
                 <label className="label block mb-2" htmlFor="kecamatan">
                   Kecamatan
                 </label>
-                <input
-                  id="kecamatan"
-                  type="text"
-                  className="form-control"
-                  {...register3("alamatKec", { required: true })}
-                />
+                <div className="custom-select">
+                  <select
+                    className="form-control"
+                    {...register3("alamatKec", { required: true })}
+                  >
+                    <option value="">Pilih kecamatan</option>
+                    <option value="Pahandut">Pahandut</option>
+                    <option value="Jekan Raya">Jekan Raya</option>
+                    <option value="Sabangau">Sabangau</option>
+                    <option value="Bukit Batu">Bukit Batu</option>
+                    <option value="Rakumpit">Rakumpit</option>
+                  </select>
+                  <div className="custom-select-icon las las-caret-down"></div>
+                </div>
                 <small className="block my-2 invalid-feedback">
                   {errors3.alamatKec?.type === "required" &&
                     "Field diatas tidak boleh kosong"}

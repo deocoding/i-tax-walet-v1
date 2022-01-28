@@ -2340,6 +2340,7 @@ button:focus {
 }
 .mapboxgl-popup {
   max-width: 350px;
+  z-index: 20;
 }
 
 .mapboxgl-popup-content {

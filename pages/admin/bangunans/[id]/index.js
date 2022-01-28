@@ -353,25 +353,12 @@ function UserBangunan() {
                                 >
                                   Kecamatan
                                 </label>
-                                <div className="custom-select">
-                                  <select
-                                    className="form-control"
-                                    value={kec}
-                                    onChange={(e) => setKec(e.target.value)}
-                                  >
-                                    <option value="">Pilih kecamatan</option>
-                                    <option value="Pahandut">Pahandut</option>
-                                    <option value="Jekan Raya">
-                                      Jekan Raya
-                                    </option>
-                                    <option value="Sabangau">Sabangau</option>
-                                    <option value="Bukit Batu">
-                                      Bukit Batu
-                                    </option>
-                                    <option value="Rakumpit">Rakumpit</option>
-                                  </select>
-                                  <div className="custom-select-icon las las-caret-down"></div>
-                                </div>
+                                <input
+                                  id="kecamatan"
+                                  type="text"
+                                  className="form-control"
+                                  onChange={(e) => setKec(e.target.value)}
+                                />
                               </div>
                               <div className="mb-2">
                                 <label

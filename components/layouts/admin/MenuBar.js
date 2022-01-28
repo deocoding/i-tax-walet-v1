@@ -84,7 +84,7 @@ function MenuBar({ title }) {
             <span className="title">User</span>
           </a>
         </Link>
-        <Link href="/admin/bangunan_list" passHref>
+        <Link href="/admin/bangunans" passHref>
           <a
             className={title === "Bangunan" ? "link active" : "link"}
             data-target="[data-menu=applications]"

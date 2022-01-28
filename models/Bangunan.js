@@ -10,7 +10,6 @@ const bangunanSchema = new mongoose.Schema(
     long: { type: String, required: true },
     tipe: { type: String },
     jumLan: { type: Number },
-    jumBur: { type: Number },
     imb: { type: String },
     itu: { type: String },
     status: { type: Number, required: true, default: 1 },
