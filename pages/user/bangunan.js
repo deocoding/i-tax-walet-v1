@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { VisitorsChart } from "../../components/charts/VisitorsChart.tsx";
 import UserLayout from "../../components/layouts/user/UserLayout";
 import { Store } from "../../utils/Store";
 import ReactMapGL, {
@@ -421,20 +420,10 @@ function UserBangunan() {
             <div className="tabs">
               <nav className="tab-nav">
                 <button className="nav-link h5 uppercase active">
-                  Potensi
+                  Foto Bangunan
                 </button>
               </nav>
-              <div className="tab-content mt-5">
-                <div id="tab-2" className="collapse open">
-                  <div className="mt-5">
-                    <VisitorsChart />
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
-          <div className="card mt-5 p-5">
-            <h3>Upload Foto Bangunan </h3>
             <div className="dropzone mt-5">
               <h3>Geser dan lepaskan gambar disini</h3>
             </div>

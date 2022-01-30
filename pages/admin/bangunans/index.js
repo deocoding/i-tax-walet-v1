@@ -1,319 +1,827 @@
-import Link from "next/link";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
+import { ProyeksiChart } from "../../../components/charts/ProyeksiChart.tsx";
 import AdminLayout from "../../../components/layouts/admin/AdminLayout";
+import { Store } from "../../../utils/Store";
+import ReactMapGL, {
+  Marker,
+  Popup,
+  FullscreenControl,
+  GeolocateControl,
+} from "react-map-gl";
+import Moment from "react-moment";
+import "moment/locale/id";
+import { getError } from "../../../utils/error";
+import axios from "axios";
+import dynamic from "next/dynamic";
+import { useForm } from "react-hook-form";
+import DatePicker, { registerLocale } from "react-datepicker";
+import id from "date-fns/locale/id";
+registerLocale("id", id);
 
-export default function BangunanList() {
+function UserBangunan() {
+  const router = useRouter();
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+
+  const [bangunans, setBangunans] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [currentPlaceId, setCurrentPlaceId] = useState(null);
+  const [newPlace, setNewPlace] = useState(null);
+
+  const [bangunanId, setBangunanId] = useState(null);
+  const [lat, setLat] = useState("");
+  const [long, setLong] = useState("");
+
+  const [proyeksi, setProyeksi] = useState(false);
+  const [bangBulans, setBangBulans] = useState([]);
+  const [bangBurungs, setBangBurungs] = useState([]);
+  const [bangSarangs, setBangSarangs] = useState([]);
+  const [startDate, setStartDate] = useState(new Date());
+
+  const LINE1 = `M210.29,164.71H61.71A5.71,5.71,0,0,0,56,170.43h0a5.71,5.71,0,0,0,5.71,5.71H128V264h16V176.14h66.29a5.71,5.71,0,0,0,5.71-5.71h0A5.71,5.71,0,0,0,210.29,164.71Z`;
+  const LINE2 = `M70.84,90.3,78.11,83l6.29,77.81.32,3.94H187.28l.33-3.94L193.94,83l7.22,7.29a5.73,5.73,0,0,0,8.15,0,5.87,5.87,0,0,0,0-8.23L144.15,16.28l0-.05L136,8l0,.05,0-.05-8.15,8.23,0,.05L62.68,82.07a5.87,5.87,0,0,0,0,8.23A5.73,5.73,0,0,0,70.84,90.3Zm65.16-17a31.43,31.43,0,1,1-31.43,31.42A31.43,31.43,0,0,1,136,73.29Z`;
+
+  const SIZE = 40;
+
+  const geolocateStyle = {
+    top: 0,
+    left: 0,
+    padding: "10px",
+  };
+
+  const fullscreenControlStyle = {
+    top: 36,
+    left: 0,
+    padding: "10px",
+  };
+
+  const [viewport, setViewport] = useState({
+    width: "calc(100% - 88px)",
+    height: "100%",
+    latitude: -1.9978,
+    longitude: 113.7621,
+    zoom: 9,
+  });
+
+  const {
+    register,
+    formState: { errors },
+    setValue,
+    handleSubmit,
+  } = useForm();
+
+  const {
+    register: register2,
+    formState: { errors: errors2 },
+    handleSubmit: handleSubmit2,
+    setValue: setValue2,
+  } = useForm();
+
+  useEffect(() => {
+    if (!userInfo) {
+      router.push("/");
+    } else {
+      const fetchBangunans = async () => {
+        try {
+          const res = await axios.get("/api/admin/bangunans/", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setBangunans(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchBangunans();
+
+      const fetchUsers = async () => {
+        try {
+          const res = await axios.get("/api/admin/users/", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setUsers(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchUsers();
+    }
+  }, []);
+
+  const handleMarkerClick = (
+    id,
+    lat,
+    long,
+    kec,
+    tipe,
+    alamat,
+    user,
+    jumLan,
+    simb,
+    situ,
+    status,
+    proyeksi
+  ) => {
+    setNewPlace(null);
+    setCurrentPlaceId(id);
+    setViewport({ ...viewport, latitude: lat, longitude: long });
+
+    setValue("bangunanId", id);
+    setValue("lat", lat);
+    setValue("long", long);
+    setValue("kec", kec);
+    setValue("tipe", tipe);
+    setValue("userBangunan", user);
+    setValue("alamat", alamat);
+    setValue("tipe", tipe);
+    setValue("jumLan", jumLan);
+    setValue("simb", simb);
+    setValue("situ", situ);
+    setValue("status", status);
+    setProyeksi(true);
+
+    setValue2("bangunanId", id);
+    setValue2("bulTah", new Date());
+
+    bangBulanHandler(id);
+  };
+
+  const handleAddClick = (e) => {
+    const [long, lat] = e.lngLat;
+    setCurrentPlaceId(null);
+    setNewPlace({
+      lat,
+      long,
+    });
+
+    setBangunanId(null);
+    setLat(lat);
+    setLong(long);
+
+    setValue("lat", lat);
+    setValue("long", long);
+
+    setValue("bangunanId", null);
+    setValue("kec", "");
+    setValue("tipe", "");
+    setValue("userBangunan", "");
+    setValue("alamat", "");
+    setValue("tipe", "");
+    setValue("jumLan", "");
+    setValue("simb", "");
+    setValue("situ", "");
+    setValue("status", "");
+
+    setProyeksi(false);
+  };
+
+  const closePopupHandler = (e) => {
+    setCurrentPlaceId(null);
+    setBangunanId(null);
+
+    setValue("bangunanId", null);
+    setValue("lat", "");
+    setValue("long", "");
+    setValue("kec", "");
+    setValue("tipe", "");
+    setValue("userBangunan", "");
+    setValue("alamat", "");
+    setValue("tipe", "");
+    setValue("jumLan", "");
+    setValue("simb", "");
+    setValue("situ", "");
+    setValue("status", "");
+
+    setProyeksi(false);
+  };
+
+  let inputProps = {
+    autoComplete: false,
+  };
+
+  const bangBulanHandler = async (bangId) => {
+    try {
+      const { data } = await axios.get(
+        `/api/admin/bangunans/bulans?id=${bangId}`,
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      if (data) {
+        setBangBulans(data.bulans);
+        setBangBurungs(data.burungs);
+        setBangSarangs(data.sarangs);
+      }
+    } catch (err) {
+      alert(getError(err));
+    }
+  };
+
+  console.log(JSON.stringify(bangBulans));
+
+  const bangunansHandler = async ({
+    bangunanId,
+    lat,
+    long,
+    userBangunan,
+    kec,
+    alamat,
+    tipe,
+    simb,
+    situ,
+    jumLan,
+    jumBur,
+    status,
+  }) => {
+    try {
+      const { data } = await axios.post(
+        "/api/admin/bangunans/add",
+        {
+          bangunanId,
+          lat,
+          long,
+          userBangunan,
+          kec,
+          alamat,
+          tipe,
+          simb,
+          situ,
+          jumLan,
+          jumBur,
+          status,
+        },
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      alert(data.pesan);
+      // Cookies.set("userInfo", data);
+      return router.reload();
+    } catch (err) {
+      alert(getError(err));
+    }
+  };
+
+  const proyeksiHandler = async ({ bangunanId, bulTah, jumBur }) => {
+    try {
+      const { data } = await axios.post(
+        "/api/admin/bangunans/proyeksi",
+        {
+          bangunanId,
+          bulTah,
+          jumBur,
+        },
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
+      // console.log(data);
+      alert(data.pesan);
+      // Cookies.set("userInfo", data);
+      return router.reload();
+    } catch (err) {
+      alert(getError(err));
+    }
+  };
+
+  // console.log(proyeksi);
+
   return (
     <AdminLayout title="Bangunan">
       {/* <!-- Breadcrumb --> */}
-      <section className="breadcrumb lg:flex items-start">
-        <div>
-          <h1>Bangunan</h1>
-          <ul>
-            <li>
-              <a href="#">Admin</a>
-            </li>
-            <li className="divider las las-arrow-right"></li>
-            <li>Daftar Bangunan</li>
-          </ul>
-        </div>
-
-        <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
-          {/* <!-- Search --> */}
-          <form
-            className="flex items-center lg:ltr:ml-2 lg:rtl:mr-2 mt-5 lg:mt-0"
-            action="#"
-          >
-            <label className="form-control-addon-within rounded-full border-secondary">
-              <input
-                type="text"
-                className="form-control border-none"
-                placeholder="Cari"
-              />
-              <button
-                type="button"
-                className="btn btn-link text-secondary dark:text-gray-700 hover:text-primary dark:hover:text-primary text-xl leading-none las las-search ltr:mr-4 rtl:ml-4"
-              ></button>
-            </label>
-          </form>
-
-          <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Sort By --> */}
-            <div className="dropdown lg:ltr:ml-2 lg:rtl:mr-2">
-              <button
-                className="btn btn_outlined btn_secondary uppercase"
-                data-toggle="dropdown-menu"
-                aria-expanded="false"
-              >
-                Urut Berdasarkan
-                <span className="ltr:ml-3 rtl:mr-3 las las-caret-down text-xl leading-none"></span>
-              </button>
-              <div className="dropdown-menu">
-                <a href="#">Ascending</a>
-                <a href="#">Descending</a>
-              </div>
-            </div>
-
-            {/* <!-- Add New --> */}
-            <Link href="/admin/bangunans/add" passHref>
-              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-                Tambah Baru
-              </button>
-            </Link>
-          </div>
-        </div>
+      <section className="breadcrumb">
+        <h1>Bangunan</h1>
+        <ul>
+          <li>
+            <span>Admin</span>
+          </li>
+          <li className="divider las las-arrow-right"></li>
+          <li>Daftar Bangunan</li>
+        </ul>
       </section>
 
-      {/* <!-- List --> */}
-      <div className="card p-5">
-        <div className="overflow-x-auto">
-          <table className="table table-auto table_hoverable w-full">
-            <thead>
-              <tr>
-                <th className="w-px">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" defaultChecked="" partial="" />
-                    <span></span>
-                  </label>
-                </th>
-                <th className="w-1/5 ltr:text-left rtl:text-right uppercase">
-                  Alamat Lengkap
-                </th>
-                <th className="text-center uppercase">Pemilik</th>
-                <th className="text-center uppercase">NPWPD</th>
-                <th className="text-center uppercase">Potensi</th>
-                <th className="text-center uppercase">Pendataan Terakhir</th>
-                <th className="uppercase"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_danger uppercase">
-                    <i className="las las-level-down-alt"></i>10%
-                  </div>
-                </td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_outlined badge_info uppercase">
-                    <i className="las las-long-arrow-alt-right"></i>0%
-                  </div>
-                </td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </td>
-                <td className="text-center">Lorem Ipsum</td>
-                <td className="text-center">Loram Ipsum</td>
-                <td className="text-center">
-                  <div className="badge badge_outlined badge_success uppercase">
-                    <i className="las las-level-up-alt"></i>24%
-                  </div>
-                </td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a href="#" className="btn btn-icon btn_outlined btn_info">
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div className="lg:flex lg:-mx-4">
+        {/* <!-- Content --> */}
+        <div className="lg:w-1/2 xl:w-2/3 lg:px-4">
+          <div className="card p-5">
+            <div className="tabs">
+              <nav className="tab-nav">
+                <button className="nav-link h5 uppercase active">
+                  Peta Lokasi
+                </button>
+              </nav>
+              <div className="tab-content mt-5">
+                <div id="tab-1" className="collapse open map">
+                  <ReactMapGL
+                    {...viewport}
+                    mapboxApiAccessToken={
+                      process.env.NEXT_PUBLIC_MAPBOX_API_KEY
+                    }
+                    onViewportChange={(nextViewport) =>
+                      setViewport(nextViewport)
+                    }
+                    mapStyle="mapbox://styles/deocoding/ckyes3rpu0tch14nwh4xw3g2g"
+                    onDblClick={handleAddClick}
+                    transitionDuration={250}
+                  >
+                    {newPlace && (
+                      <Marker latitude={newPlace.lat} longitude={newPlace.long}>
+                        <span>
+                          <svg
+                            height={SIZE}
+                            viewBox="0 0 272 272"
+                            style={{
+                              cursor: "pointer",
+                              fill: "rgb(255 193 7 / 1)",
+                              stroke: "none",
+                              transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
+                            }}
+                          >
+                            <path d={LINE1} />
+                            <path d={LINE2} />
+                          </svg>
+                        </span>
+                      </Marker>
+                    )}
 
-      <div className="mt-5">
-        {/* <!-- Pagination --> */}
-        <div className="card lg:flex">
-          <nav className="flex flex-wrap p-5">
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_primary"
-            >
-              Awal
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_primary"
-            >
-              1
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              2
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              3
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              4
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              5
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_secondary"
-            >
-              Akhir
-            </a>
-          </nav>
-          <div className="flex items-center ltr:ml-auto rtl:mr-auto p-5 border-t lg:border-t-0 border-gray-200 dark:border-gray-900">
-            Menampilkan 1-5 of 100 item
-          </div>
-          <div className="flex items-center p-5 border-t lg:border-t-0 lg:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
-            <span className="ltr:mr-2 rtl:ml-2">Tampil</span>
-            <div className="dropdown">
-              <button
-                className="btn btn_outlined btn_secondary"
-                data-toggle="dropdown-menu"
-                aria-expanded="false"
-              >
-                5
-                <span className="ltr:ml-3 rtl:mr-3 las las-caret-down text-xl leading-none"></span>
-              </button>
-              <div className="dropdown-menu">
-                <a href="#">5</a>
-                <a href="#">10</a>
-                <a href="#">15</a>
+                    {bangunans &&
+                      bangunans.map((bangunan) => (
+                        <span key={bangunan._id}>
+                          <Marker
+                            latitude={JSON.parse(bangunan.lat)}
+                            longitude={JSON.parse(bangunan.long)}
+                          >
+                            {bangunan.status === 1 && (
+                              <span>
+                                <svg
+                                  height={SIZE}
+                                  viewBox="0 0 272 272"
+                                  style={{
+                                    cursor: "pointer",
+                                    fill: "rgb(85 85 85 / 1)",
+                                    stroke: "none",
+                                    transform: `translate(${
+                                      -SIZE / 2
+                                    }px,${-SIZE}px)`,
+                                  }}
+                                  onClick={() =>
+                                    handleMarkerClick(
+                                      bangunan._id,
+                                      JSON.parse(bangunan.lat),
+                                      JSON.parse(bangunan.long),
+                                      bangunan.kec,
+                                      bangunan.tipe,
+                                      bangunan.alamat,
+                                      bangunan.user,
+                                      bangunan.jumLan,
+                                      bangunan.imb,
+                                      bangunan.itu,
+                                      bangunan.status,
+                                      bangunan.proyeksi
+                                    )
+                                  }
+                                >
+                                  <path d={LINE1} />
+                                  <path d={LINE2} />
+                                </svg>
+                              </span>
+                            )}
+                            {bangunan.status === 2 && (
+                              <span>
+                                <svg
+                                  height={SIZE}
+                                  viewBox="0 0 272 272"
+                                  style={{
+                                    cursor: "pointer",
+                                    fill: "rgb(23 162 184 / 1)",
+                                    stroke: "none",
+                                    transform: `translate(${
+                                      -SIZE / 2
+                                    }px,${-SIZE}px)`,
+                                  }}
+                                  onClick={() =>
+                                    handleMarkerClick(
+                                      bangunan._id,
+                                      JSON.parse(bangunan.lat),
+                                      JSON.parse(bangunan.long),
+                                      bangunan.kec,
+                                      bangunan.tipe,
+                                      bangunan.alamat,
+                                      bangunan.user,
+                                      bangunan.jumLan,
+                                      bangunan.imb,
+                                      bangunan.itu,
+                                      bangunan.status,
+                                      bangunan.proyeksi
+                                    )
+                                  }
+                                >
+                                  <path d={LINE1} />
+                                  <path d={LINE2} />
+                                </svg>
+                              </span>
+                            )}
+                            {bangunan.status === 3 && (
+                              <span>
+                                <svg
+                                  height={SIZE}
+                                  viewBox="0 0 272 272"
+                                  style={{
+                                    cursor: "pointer",
+                                    fill: "rgb(40 167 69 / 1)",
+                                    stroke: "none",
+                                    transform: `translate(${
+                                      -SIZE / 2
+                                    }px,${-SIZE}px)`,
+                                  }}
+                                  onClick={() =>
+                                    handleMarkerClick(
+                                      bangunan._id,
+                                      JSON.parse(bangunan.lat),
+                                      JSON.parse(bangunan.long),
+                                      bangunan.kec,
+                                      bangunan.tipe,
+                                      bangunan.alamat,
+                                      bangunan.user,
+                                      bangunan.jumLan,
+                                      bangunan.imb,
+                                      bangunan.itu,
+                                      bangunan.status,
+                                      bangunan.proyeksi
+                                    )
+                                  }
+                                >
+                                  <path d={LINE1} />
+                                  <path d={LINE2} />
+                                </svg>
+                              </span>
+                            )}
+                          </Marker>
+                          {bangunan._id === currentPlaceId && (
+                            <Popup
+                              latitude={JSON.parse(bangunan.lat)}
+                              longitude={JSON.parse(bangunan.long)}
+                              closeButton={true}
+                              closeOnClick={false}
+                              anchor="left"
+                              onClose={() => closePopupHandler(null)}
+                            >
+                              <div className="flex justify-center">
+                                <div className="block text-center">
+                                  <div className="pb-2 border-b border-gray-300">
+                                    {bangunan.status === 1 && (
+                                      <div className="badge badge_outlined badge_secondary uppercase">
+                                        Pendaftaran
+                                      </div>
+                                    )}
+                                    {bangunan.status === 2 && (
+                                      <div className="badge badge_outlined badge_info uppercase">
+                                        Pendataan
+                                      </div>
+                                    )}
+                                    {bangunan.status === 3 && (
+                                      <div className="badge badge_outlined badge_success uppercase">
+                                        Valid
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="p-4">
+                                    <h5 className="text-xl font-medium mb-2">
+                                      {bangunan.alamat}
+                                    </h5>
+                                    <p className="text-gray-700 text-normal mb-2">
+                                      {"Kec. " +
+                                        bangunan.kec +
+                                        ", " +
+                                        bangunan.kabKot}
+                                    </p>
+                                    {bangunan.jumLan && bangunan.jumBur && (
+                                      <p className="text-gray-700 text-base mb-2">
+                                        {bangunan.jumLan} lantai,{" "}
+                                        {bangunan.jumBur} burung
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="pt-3 border-t border-gray-300 text-gray-600">
+                                    <Moment fromNow>
+                                      {bangunan.updatedAt}
+                                    </Moment>
+                                  </div>
+                                </div>
+                              </div>
+                            </Popup>
+                          )}
+                        </span>
+                      ))}
+                    <GeolocateControl style={geolocateStyle} />
+                    <FullscreenControl style={fullscreenControlStyle} />
+                  </ReactMapGL>
+                </div>
               </div>
             </div>
-            <span className="ltr:ml-2 rtl:mr-2">item</span>
           </div>
+          {proyeksi && (
+            <div className="card p-5 mt-5">
+              <div className="tabs">
+                <nav className="tab-nav">
+                  <button className="nav-link h5 uppercase active">
+                    Potensi Pajak
+                  </button>
+                </nav>
+                <div className="tab-content mt-5">
+                  <div id="tab-2" className="collapse open">
+                    <div className="mt-5">
+                      <ProyeksiChart
+                        bulans={bangBulans}
+                        burungs={bangBurungs}
+                        sarangs={bangSarangs}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* <!-- Footer Bar --> */}
-      <div className="footer-bar">
-        <div className="flex items-center uppercase">
-          <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
-            1
-          </span>
-          Item Terpilih
-        </div>
-        <div className="ltr:ml-auto rtl:mr-auto">
-          <button className="btn btn_danger uppercase">
-            <span className="las las-trash-alt text-xl leading-none ltr:mr-2 rtl:ml-2"></span>
-            Hapus
-          </button>
+        {/* Potensi */}
+
+        {/* <!-- Featured Image --> */}
+
+        <div className="lg:w-1/2 xl:w-1/3 lg:px-4 pt-5 lg:pt-0">
+          <div className="card p-5">
+            <h3>Tambah Bangunan</h3>
+            <div className="mt-5">
+              <form onSubmit={handleSubmit(bangunansHandler)}>
+                {bangunanId && (
+                  <input type="hidden" {...register("bangunanId")} />
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="latitude">
+                      Latitude
+                    </label>
+                    <input
+                      id="latitude"
+                      type="text"
+                      className="form-control"
+                      {...register("lat", { required: true })}
+                    />
+                    <small className="block my-2 invalid-feedback">
+                      {errors.lat?.type === "required" &&
+                        "Field diatas tidak boleh kosong"}
+                    </small>
+                  </div>
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="longitude">
+                      Longitude
+                    </label>
+                    <input
+                      id="longitude"
+                      type="text"
+                      className="form-control"
+                      {...register("long", { required: true })}
+                    />
+                    <small className="block my-2 invalid-feedback">
+                      {errors.long?.type === "required" &&
+                        "Field diatas tidak boleh kosong"}
+                    </small>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="userName">
+                      User
+                    </label>
+                    <div className="custom-select">
+                      <select
+                        className="form-control"
+                        {...register("userBangunan", { required: true })}
+                      >
+                        {users &&
+                          users.map((user) => (
+                            <option key={user._id} value={user._id}>
+                              {user.namaLengkap}
+                            </option>
+                          ))}
+                      </select>
+                      <div className="custom-select-icon las las-caret-down"></div>
+                    </div>
+                    <small className="block my-2 invalid-feedback">
+                      {errors.userBangunan?.type === "required" &&
+                        "Field diatas tidak boleh kosong"}
+                    </small>
+                  </div>
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="kecamatan">
+                      Kecamatan
+                    </label>
+                    <div className="custom-select">
+                      <select
+                        className="form-control"
+                        {...register("kec", { required: true })}
+                      >
+                        <option value="Pahandut">Pahandut</option>
+                        <option value="Jekan Raya">Jekan Raya</option>
+                        <option value="Sabangau">Sabangau</option>
+                        <option value="Bukit Batu">Bukit Batu</option>
+                        <option value="Rakumpit">Rakumpit</option>
+                      </select>
+                      <div className="custom-select-icon las las-caret-down"></div>
+                    </div>
+                    <small className="block my-2 invalid-feedback">
+                      {errors.kec?.type === "required" &&
+                        "Field diatas tidak boleh kosong"}
+                    </small>
+                  </div>
+                </div>
+                <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="alamatLengkap">
+                    Alamat Lengkap
+                  </label>
+                  <textarea
+                    id="alamatLengkap"
+                    className="form-control"
+                    rows="4"
+                    {...register("alamat", { required: true })}
+                  ></textarea>
+                  <small className="block my-2 invalid-feedback">
+                    {errors.alamat?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="tipeBangunan">
+                      Tipe Bangunan
+                    </label>
+                    <div className="custom-select">
+                      <select className="form-control" {...register("tipe")}>
+                        <option value="Permanen">Permanen</option>
+                        <option value="Semi Permanen">Semi Permanen</option>
+                        <option value="Darurat">Darurat</option>
+                      </select>
+                      <div className="custom-select-icon las las-caret-down"></div>
+                    </div>
+                  </div>
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="jumLan">
+                      Jumlah Lantai
+                    </label>
+                    <input
+                      id="jumLan"
+                      type="number"
+                      className="form-control"
+                      {...register("jumLan")}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="simb">
+                      No. SIMB
+                    </label>
+                    <input
+                      id="simb"
+                      type="text"
+                      className="form-control"
+                      {...register("simb")}
+                    />
+                  </div>
+                  <div className="mb-5">
+                    <label className="label block mb-2" htmlFor="situ">
+                      No. SITU
+                    </label>
+                    <input
+                      id="situ"
+                      type="text"
+                      className="form-control"
+                      {...register("situ")}
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="status">
+                    Status
+                  </label>
+                  <div className="custom-select">
+                    <select
+                      className="form-control"
+                      {...register("status", { required: true })}
+                    >
+                      <option defaultValue>Pilih status</option>
+                      <option value={1}>Pendaftaran</option>
+                      <option value={2}>Pendataan</option>
+                      <option value={3}>Valid</option>
+                    </select>
+                    <div className="custom-select-icon las las-caret-down"></div>
+                  </div>
+                  <small className="block my-2 invalid-feedback">
+                    {errors.status?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
+
+                <div className="mt-5">
+                  <button type="submit" className="btn btn_primary uppercase">
+                    Simpan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* <div className="card p-5 mt-5">
+            <h3>Upload Foto Bangunan </h3>
+            <div className="dropzone mt-5">
+              <h3>Geser dan lepaskan gambar disini</h3>
+            </div>
+          </div> */}
+
+          {proyeksi && (
+            <div className="card p-5 mt-5">
+              <h3>Pendataan Berkala</h3>
+              <div className="mt-5">
+                <form
+                  onSubmit={handleSubmit2(proyeksiHandler)}
+                  autoComplete="off"
+                >
+                  {bangunanId && (
+                    <input type="hidden" {...register2("bangunanId")} />
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="mb-5">
+                      <label className="label block mb-2" htmlFor="pendataanAt">
+                        Bulan Tahun
+                      </label>
+                      <DatePicker
+                        locale="id"
+                        isClearable
+                        innerRef={{
+                          ...register2("bulTah", { required: true }),
+                        }}
+                        className={"form-control"}
+                        selected={startDate}
+                        dateFormat="dd/MM/yyyy"
+                        showMonthYearPicker
+                        onChange={(val) => {
+                          setStartDate(val);
+                          setValue2("bulTah", val);
+                        }}
+                      />
+
+                      {/* <div className="input-group mt-5">
+                        <input
+                          type="text"
+                          className="form-control input-group-item"
+                          placeholder="Input"
+                        />
+                        <button
+                          className="btn btn_primary uppercase input-group-item"
+                          onClick={openCalendar}
+                        >
+                          Button
+                        </button>
+                      </div> */}
+
+                      <small className="block my-2 invalid-feedback">
+                        {errors2.bulTah?.type === "required" &&
+                          "Field diatas tidak boleh kosong"}
+                      </small>
+                    </div>
+                    <div className="mb-5">
+                      <label className="label block mb-2" htmlFor="jumBur">
+                        Jumlah Burung
+                      </label>
+                      <input
+                        id="jumBur"
+                        type="number"
+                        className="form-control"
+                        {...register2("jumBur", { required: true })}
+                      />
+                      <small className="block my-2 invalid-feedback">
+                        {errors2.jumBur?.type === "required" &&
+                          "Field diatas tidak boleh kosong"}
+                      </small>
+                    </div>
+                  </div>
+                  <div className="mt-5">
+                    <button className="btn btn_primary uppercase">
+                      Simpan
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </AdminLayout>
   );
 }
+
+export default dynamic(() => Promise.resolve(UserBangunan), { ssr: false });
