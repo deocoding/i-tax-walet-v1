@@ -3,47 +3,48 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import AdminLayout from "../../../components/layouts/admin/AdminLayout";
-import UsersTable from "../../../components/tables/UsersTable";
+import PajaksTable from "../../../components/tables/PajaksTable";
 import { Store } from "../../../utils/Store";
+import "moment/locale/id";
 
 export default function UserLists() {
   const router = useRouter();
-  const { state, dispatch } = useContext(Store);
+  const { state } = useContext(Store);
   const { userInfo } = state;
-  const [users, setUsers] = useState([]);
+  const [pajaks, setPajaks] = useState([]);
   const [cari, setCari] = useState("");
 
   useEffect(() => {
     if (!userInfo) {
       router.push("/");
     } else {
-      const fetchUsers = async () => {
+      const fetchPajaks = async () => {
         try {
-          const res = await axios.get(`/api/admin/users?cari=${cari}`, {
+          const res = await axios.get(`/api/admin/pajaks?cari=${cari}`, {
             headers: { authorization: `Bearer ${userInfo.token}` },
           });
-          setUsers(res.data);
+          setPajaks(res.data);
         } catch (err) {
           console.log(err);
         }
       };
 
-      fetchUsers();
+      fetchPajaks();
     }
-  }, [cari]);
+  }, [cari, userInfo]);
 
   return (
-    <AdminLayout title="User">
+    <AdminLayout title="Pajak">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb lg:flex items-start">
         <div>
-          <h1>User</h1>
+          <h1>Pajak</h1>
           <ul>
             <li>
               <a href="#">Admin</a>
             </li>
             <li className="divider las las-arrow-right"></li>
-            <li>Daftar User</li>
+            <li>Daftar Pajak</li>
           </ul>
         </div>
 
@@ -92,7 +93,7 @@ export default function UserLists() {
 
           <div className="flex mt-5 lg:mt-0">
             {/* <!-- Add New --> */}
-            <Link href="/admin/users/add" passHref>
+            <Link href="/admin/pajaks/add" passHref>
               <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
                 Tambah Baru
               </button>
@@ -101,7 +102,7 @@ export default function UserLists() {
         </div>
       </section>
 
-      <UsersTable data={users} />
+      <PajaksTable data={pajaks} />
     </AdminLayout>
   );
 }

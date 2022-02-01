@@ -12,6 +12,7 @@ const pajakSchema = new mongoose.Schema(
     batBay: { type: Date, required: true },
     sudBay: { type: Boolean, required: true, default: false },
     totBay: { type: Number },
+    tgglBay: { type: Date },
     fotoBayar: { type: String },
     sisBay: { type: Number },
     status: { type: Number, required: true, default: 1 },

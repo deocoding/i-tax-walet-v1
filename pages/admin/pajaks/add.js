@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import UserLayout from "../../../components/layouts/user/UserLayout";
+import AdminLayout from "../../../components/layouts/admin/AdminLayout";
 import { Store } from "../../../utils/Store";
 import DatePicker, { registerLocale } from "react-datepicker";
 import id from "date-fns/locale/id";
@@ -27,6 +27,7 @@ export default function UserDetail() {
   const [gambarJual, setGambarJual] = useState("");
   const [btnTambah, setBtnTambah] = useState(false);
   const [btnHapus, setBtnHapus] = useState(false);
+  const [user, setUser] = useState([]);
 
   const {
     register,
@@ -48,20 +49,34 @@ export default function UserDetail() {
       router.push("/");
     } else {
       setValue("tgglJul", new Date());
-    }
-  }, []);
 
-  const pajakHandler = async ({ volTon, nilJul, tgglJul }) => {
+      const fetchUsers = async () => {
+        try {
+          const res = await axios.get(`/api/admin/users/`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setUser(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchUsers();
+    }
+  }, [userInfo]);
+
+  const pajakHandler = async ({ userId, volTon, nilJul, tgglJul }) => {
     try {
       setLoading(true);
       const { data } = await axios.post(
-        `/api/user/pajaks`,
-        { volTon, nilJul, tgglJul },
+        `/api/admin/pajaks/`,
+        { userId, volTon, nilJul, tgglJul },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       if (data) {
+        setValue("userId", "");
         setValue("volTon", "");
         setValue("nilJul", "");
         setValue("tgglJul", new Date());
@@ -70,7 +85,7 @@ export default function UserDetail() {
         setLoading(false);
         setTimeout(async () => {
           setIconCheck(false);
-          setFocus("volTon");
+          setFocus("userId");
         }, 1500);
         setPajak(data);
       }
@@ -86,7 +101,7 @@ export default function UserDetail() {
     try {
       setLoadingImage(true);
       const { data } = await axios.post(
-        "/api/user/pajaks/upload",
+        "/api/admin/pajaks/upload",
         bodyFormData,
         {
           headers: {
@@ -115,7 +130,7 @@ export default function UserDetail() {
   const imageHandler = async ({ pajakId, gambar }) => {
     try {
       setLoadingImage(true);
-      const { data } = await axios.put("/api/user/pajaks/jual-image", {
+      const { data } = await axios.put("/api/admin/pajaks/jual-image", {
         pajakId,
         gambar,
       });
@@ -137,7 +152,7 @@ export default function UserDetail() {
   async function hapusGambarHandler(namaFile, pajakId) {
     try {
       setLoadingImage(true);
-      const { data } = await axios.put("/api/user/pajaks/delete-jual-image", {
+      const { data } = await axios.put("/api/admin/pajaks/delete-jual-image", {
         namaFile,
         pajakId,
       });
@@ -156,8 +171,10 @@ export default function UserDetail() {
     }
   }
 
+  // console.log(user);
+
   return (
-    <UserLayout title="Pajak">
+    <AdminLayout title="Pajak">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb">
         <h1>Pajak</h1>
@@ -182,6 +199,29 @@ export default function UserDetail() {
               </nav>
             </div>
             <form onSubmit={handleSubmit(pajakHandler)}>
+              <div className="mb-5">
+                <label className="label block mb-2" htmlFor="userId">
+                  User
+                </label>
+                <div className="custom-select">
+                  <select
+                    className="form-control"
+                    {...register("userId", { required: true })}
+                  >
+                    {user &&
+                      user.map((usr) => (
+                        <option key={usr._id} value={usr._id}>
+                          {usr.namaLengkap}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="custom-select-icon las las-caret-down"></div>
+                </div>
+                <small className="block my-2 invalid-feedback">
+                  {errors.userId?.type === "required" &&
+                    "Field diatas tidak boleh kosong"}
+                </small>
+              </div>
               <div className="mb-5">
                 <label className="label block mb-2" htmlFor="volTon">
                   Volume/Tonase (Kg)
@@ -455,6 +495,6 @@ export default function UserDetail() {
           </div>
         </div>
       </div>
-    </UserLayout>
+    </AdminLayout>
   );
 }

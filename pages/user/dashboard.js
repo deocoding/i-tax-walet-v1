@@ -2,6 +2,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import ReactMapGL, { Marker, StaticMap } from "react-map-gl";
+import NumberFormat from "react-number-format";
 import UserLayout from "../../components/layouts/user/UserLayout";
 import { Store } from "../../utils/Store";
 
@@ -10,7 +11,11 @@ export default function Dashboard() {
   const { state } = useContext(Store);
   const { userInfo } = state;
 
+  const [pajakLimits, setPajakLimits] = useState([]);
   const [bangunans, setBangunans] = useState([]);
+  const [statusBangunan, setStatusBangunan] = useState();
+  const [user, setUser] = useState([]);
+  const [pajaks, setPajaks] = useState([]);
 
   const LINE1 = `M210.29,164.71H61.71A5.71,5.71,0,0,0,56,170.43h0a5.71,5.71,0,0,0,5.71,5.71H128V264h16V176.14h66.29a5.71,5.71,0,0,0,5.71-5.71h0A5.71,5.71,0,0,0,210.29,164.71Z`;
   const LINE2 = `M70.84,90.3,78.11,83l6.29,77.81.32,3.94H187.28l.33-3.94L193.94,83l7.22,7.29a5.73,5.73,0,0,0,8.15,0,5.87,5.87,0,0,0,0-8.23L144.15,16.28l0-.05L136,8l0,.05,0-.05-8.15,8.23,0,.05L62.68,82.07a5.87,5.87,0,0,0,0,8.23A5.73,5.73,0,0,0,70.84,90.3Zm65.16-17a31.43,31.43,0,1,1-31.43,31.42A31.43,31.43,0,0,1,136,73.29Z`;
@@ -49,15 +54,51 @@ export default function Dashboard() {
               latitude: Number(res.data.latAkhir),
               longitude: Number(res.data.longAkhir),
             });
+            setStatusBangunan(res.statusTerakhir);
           }
         } catch (err) {
           console.log(err);
         }
       };
+      const fetchUser = async () => {
+        try {
+          const { data } = await axios.get(`/api/users/${userInfo._id}`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setUser(data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      const fetchPajaks = async () => {
+        try {
+          const { data } = await axios.get("/api/user/dasboard/pajak", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setPajaks(data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      const fetchPajaksLimit = async () => {
+        try {
+          const { data } = await axios.get("/api/user/dasboard/pajak-limit", {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          if (data) {
+            setPajakLimits(data);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchPajaksLimit();
       fetchBangunans();
       fetchLokAkhir();
+      fetchUser();
+      fetchPajaks();
     }
-  }, []);
+  }, [userInfo]);
 
   return (
     <UserLayout title="Dashboard">
@@ -160,85 +201,6 @@ export default function Dashboard() {
                         </span>
                       ))}
                   </StaticMap>
-                  {/* <ReactMapGL
-                    {...viewport}
-                    mapboxApiAccessToken={
-                      process.env.NEXT_PUBLIC_MAPBOX_API_KEY
-                    }
-                    onViewportChange={(nextViewport) =>
-                      setViewport(nextViewport)
-                    }
-                    mapStyle="mapbox://styles/deocoding/ckyes3rpu0tch14nwh4xw3g2g"
-                    transitionDuration={250}
-                  >
-                    {bangunans &&
-                      bangunans.map((bangunan) => (
-                        <span key={bangunan._id}>
-                          <Marker
-                            latitude={JSON.parse(bangunan.lat)}
-                            longitude={JSON.parse(bangunan.long)}
-                          >
-                            {bangunan.status === 1 && (
-                              <span>
-                                <svg
-                                  height={SIZE}
-                                  viewBox="0 0 272 272"
-                                  style={{
-                                    cursor: "pointer",
-                                    fill: "rgb(85 85 85 / 1)",
-                                    stroke: "none",
-                                    transform: `translate(${
-                                      -SIZE / 2
-                                    }px,${-SIZE}px)`,
-                                  }}
-                                >
-                                  <path d={LINE1} />
-                                  <path d={LINE2} />
-                                </svg>
-                              </span>
-                            )}
-                            {bangunan.status === 2 && (
-                              <span>
-                                <svg
-                                  height={SIZE}
-                                  viewBox="0 0 272 272"
-                                  style={{
-                                    cursor: "pointer",
-                                    fill: "rgb(23 162 184 / 1)",
-                                    stroke: "none",
-                                    transform: `translate(${
-                                      -SIZE / 2
-                                    }px,${-SIZE}px)`,
-                                  }}
-                                >
-                                  <path d={LINE1} />
-                                  <path d={LINE2} />
-                                </svg>
-                              </span>
-                            )}
-                            {bangunan.status === 3 && (
-                              <span>
-                                <svg
-                                  height={SIZE}
-                                  viewBox="0 0 272 272"
-                                  style={{
-                                    cursor: "pointer",
-                                    fill: "rgb(40 167 69 / 1)",
-                                    stroke: "none",
-                                    transform: `translate(${
-                                      -SIZE / 2
-                                    }px,${-SIZE}px)`,
-                                  }}
-                                >
-                                  <path d={LINE1} />
-                                  <path d={LINE2} />
-                                </svg>
-                              </span>
-                            )}
-                          </Marker>
-                        </span>
-                      ))}
-                  </ReactMapGL> */}
                 </div>
               </div>
             </div>
@@ -249,19 +211,29 @@ export default function Dashboard() {
           <div className="lg:flex lg:-mx-4">
             <div className="lg:w-1/2 lg:px-4">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
-                <span className="text-primary text-5xl leading-none las las-bullseye"></span>
-                <p className="mt-2">Target Pajak</p>
+                <span className="text-primary text-5xl leading-none las las-receipt"></span>
+                <p className="mt-2">Banyak Pelaporan Pajak</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  Rp0
+                  {pajaks && pajaks.countPajak}
                 </div>
               </div>
             </div>
             <div className="lg:w-1/2 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
-                <span className="text-primary text-5xl leading-none las las-chart-line"></span>
-                <p className="mt-2">Realisasi</p>
+                <span className="text-primary text-5xl leading-none las las-bullseye"></span>
+                <p className="mt-2">Total Pembayaran Pajak</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  Rp0
+                  {pajaks.totBay &&
+                    pajaks.totBay.map((e) => (
+                      <NumberFormat
+                        key={e._id}
+                        value={e.total}
+                        displayType={"text"}
+                        thousandSeparator={true}
+                        prefix={"Rp"}
+                      />
+                    ))}
+                  {/* <NumberFormat value={2456981} displayType={'text'} thousandSeparator={true} prefix={'$'} />; */}
                 </div>
               </div>
             </div>
@@ -273,25 +245,66 @@ export default function Dashboard() {
               <div className="rrelative card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-address-book"></span>
                 <p className="mt-2">Status Pemilik</p>
-                <div className="badge badge_outlined badge_secondary uppercase mt-5">
-                  <div className="p-2 text-lg leading-none">Pendaftaran</div>
-                </div>
+
+                {user && user.status === 1 && (
+                  <div className="badge badge_outlined badge_secondary uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Pendaftaran</div>
+                  </div>
+                )}
+                {user && user.status === 2 && (
+                  <div className="badge badge_outlined badge_info uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Pendataan</div>
+                  </div>
+                )}
+                {user && user.status === 3 && (
+                  <div className="badge badge_outlined badge_success uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Valid</div>
+                  </div>
+                )}
+                {!user && (
+                  <div className="badge badge_outlined badge_warning uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Belum diisi</div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-industry"></span>
                 <p className="mt-2">Status Bangunan</p>
-                <div className="badge badge_outlined badge_secondary uppercase mt-5">
-                  <div className="p-2 text-lg leading-none">Pendaftaran</div>
-                </div>
+                {statusBangunan && statusBangunan === 1 && (
+                  <div className="badge badge_outlined badge_secondary uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Pendaftaran</div>
+                  </div>
+                )}
+                {statusBangunan && statusBangunan === 2 && (
+                  <div className="badge badge_outlined badge_info uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Pendataan</div>
+                  </div>
+                )}
+                {statusBangunan && statusBangunan === 3 && (
+                  <div className="badge badge_outlined badge_success uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Valid</div>
+                  </div>
+                )}
+                {!statusBangunan && (
+                  <div className="badge badge_outlined badge_warning uppercase mt-5">
+                    <div className="p-2 text-lg leading-none">Belum diisi</div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="lg:w-1/3 lg:px-4 pt-5 lg:pt-0">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
-                <span className="text-primary text-5xl leading-none las las-receipt"></span>
-                <p className="mt-2">Pelaporan Pajak</p>
-                <div className="p-2 text-2xl leading-none mt-5">0</div>
+                <span className="text-primary text-5xl leading-none las las-id-card"></span>
+                <p className="mt-2">Nomor NPWPD</p>
+                <div className="text-primary mt-5 p-2 text-2xl leading-none">
+                  {user && user.npwpd && user.npwpd}
+                  {/* P 10069696969 */}
+                  {user && !user.npwpd && (
+                    <span className="uppercase">Proses</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -303,52 +316,60 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="w-px ltr:text-left rtl:text-right uppercase">
-                    Penjualan
+                    Total Penjualan
                   </th>
-                  <th className="w-px uppercase">Total Pajak</th>
-                  <th className="w-px uppercase">Status</th>
+                  <th className="w-px ltr:text-left rtl:text-right  uppercase">
+                    Pajak 10%
+                  </th>
+                  <th className="w-px ltr:text-left rtl:text-right  uppercase">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan={3}>Data Kosong</td>
-                </tr>
-                {/* <tr>
-                  <td>15 Kg</td>
-                  <td className="text-center">Rp5.000.000</td>
-                  <td className="text-center">
-                    <div className="badge badge_outlined badge_secondary uppercase">
-                      Denda
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>17 Kg</td>
-                  <td className="text-center">Rp6.000.000</td>
-                  <td className="text-center">
-                    <div className="badge badge_outlined badge_success uppercase">
-                      Lunas
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>4 Kg</td>
-                  <td className="text-center">Rp1.500.000</td>
-                  <td className="text-center">
-                    <div className="badge badge_outlined badge_warning uppercase">
-                      Kurang
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>24 Kg</td>
-                  <td className="text-center">Rp10.000.000</td>
-                  <td className="text-center">
-                    <div className="badge badge_outlined badge_info uppercase">
-                      Proses
-                    </div>
-                  </td>
-                </tr> */}
+                {pajakLimits &&
+                  pajakLimits.map((f) => (
+                    <tr key={f._id}>
+                      <td className="w-px ltr:text-left rtl:text-right">
+                        <NumberFormat
+                          value={f.totJual}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Rp"}
+                        />
+                      </td>
+                      <td className="w-px">
+                        <NumberFormat
+                          value={f.totPajak}
+                          displayType={"text"}
+                          thousandSeparator={true}
+                          prefix={"Rp"}
+                        />
+                      </td>
+                      <td className="w-px">
+                        {f.status === 1 && (
+                          <div className="badge badge_secondary uppercase">
+                            Pelaporan
+                          </div>
+                        )}
+                        {f.status === 2 && (
+                          <div className="badge badge_warning uppercase">
+                            Kurang Bayar
+                          </div>
+                        )}
+                        {f.status === 3 && (
+                          <div className="badge badge_danger uppercase">
+                            Denda
+                          </div>
+                        )}
+                        {f.status === 4 && (
+                          <div className="badge badge_success uppercase">
+                            Lunas
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

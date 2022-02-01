@@ -1,26 +1,27 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import UserLayout from "../../../components/layouts/user/UserLayout";
-import { Store } from "../../../utils/Store";
+import UserLayout from "../../../../components/layouts/user/UserLayout";
+import { Store } from "../../../../utils/Store";
 import DatePicker, { registerLocale } from "react-datepicker";
 import id from "date-fns/locale/id";
 registerLocale("id", id);
-import { useForm } from "react-hook-form";
-import { getError } from "../../../utils/error";
+import { useForm, Controller } from "react-hook-form";
+import { getError } from "../../../../utils/error";
 import axios from "axios";
 import Image from "next/image";
 import NumberFormat from "react-number-format";
 
-export default function UserDetail() {
+export default function PajakDetail({ params }) {
+  const pajakId = params.id;
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
 
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState();
   const [loading, setLoading] = useState(false);
   const [iconCheck, setIconCheck] = useState(false);
 
-  const [pajak, setPajak] = useState();
+  const [pajak, setPajak] = useState({});
 
   const [loadingImage, setLoadingImage] = useState(false);
   const [checkImage, setCheckImage] = useState(false);
@@ -30,6 +31,7 @@ export default function UserDetail() {
 
   const {
     register,
+    control,
     formState: { errors },
     setValue,
     setFocus,
@@ -47,25 +49,47 @@ export default function UserDetail() {
     if (!userInfo) {
       router.push("/");
     } else {
-      setValue("tgglJul", new Date());
+      const fetchPajak = async () => {
+        try {
+          const { data } = await axios.get(`/api/user/pajaks/${pajakId}`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          if (data) {
+            setPajak(data);
+            setValue("pajakId", data._id);
+            setValue("volTon", data.volTon);
+            setValue("nilJul", data.nilJul);
+            setValue("tgglJul", data.tgglJul);
+            setStartDate(new Date(data.tgglJul));
+            setValue2("pajakId", data._id);
+            if (data.fotoJual) {
+              setGambarJual(data.fotoJual);
+              setBtnHapus(true);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchPajak();
     }
   }, []);
 
-  const pajakHandler = async ({ volTon, nilJul, tgglJul }) => {
+  const pajakHandler = async ({ pajakId, volTon, nilJul, tgglJul }) => {
     try {
       setLoading(true);
-      const { data } = await axios.post(
+      const { data } = await axios.put(
         `/api/user/pajaks`,
-        { volTon, nilJul, tgglJul },
+        { pajakId, volTon, nilJul, tgglJul },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       if (data) {
-        setValue("volTon", "");
-        setValue("nilJul", "");
-        setValue("tgglJul", new Date());
-        setValue2("pajakId", data._id);
+        setValue("volTon", data.volTon);
+        setValue("nilJul", data.nilJul);
+        setValue("tgglJul", data.tgglJul);
+        setStartDate(new Date(data.tgglJul));
         setIconCheck(true);
         setLoading(false);
         setTimeout(async () => {
@@ -166,7 +190,9 @@ export default function UserDetail() {
             <span>User</span>
           </li>
           <li className="divider las las-arrow-right"></li>
-          <li>Tambah Pajak</li>
+          <li>Ubah Pajak</li>
+          <li className="divider las las-arrow-right"></li>
+          <li>{pajakId}</li>
         </ul>
       </section>
 
@@ -182,6 +208,7 @@ export default function UserDetail() {
               </nav>
             </div>
             <form onSubmit={handleSubmit(pajakHandler)}>
+              <input hidden {...register("pajakId", { required: true })} />
               <div className="mb-5">
                 <label className="label block mb-2" htmlFor="volTon">
                   Volume/Tonase (Kg)
@@ -202,8 +229,21 @@ export default function UserDetail() {
                 <label className="label block mb-2" htmlFor="nilJul">
                   Nilai Jual per Kg (Rp)
                 </label>
+                {/* <Controller
+                  control={control}
+                  {...register("nilJul", { required: true })}
+                  render={({ field: { onChange, name, value } }) => (
+                    <NumberFormat
+                      thousandSeparator={true}
+                      className="form-control"
+                      value={value}
+                      onChange={onChange}
+                    />
+                  )}
+                /> */}
                 <NumberFormat
                   name="nilJul"
+                  value={pajak.nilJul}
                   className="form-control"
                   thousandSeparator={true}
                   {...register("nilJul", { required: true })}
@@ -214,12 +254,6 @@ export default function UserDetail() {
                     setValue("nilJul", value);
                   }}
                 />
-                {/* <input
-                  id="nilJul"
-                  type="number"
-                  className="form-control"
-                  {...register("nilJul", { required: true })}
-                /> */}
                 <small className="block my-2 invalid-feedback">
                   {errors.nilJul?.type === "required" &&
                     "Field diatas tidak boleh kosong"}
@@ -252,7 +286,7 @@ export default function UserDetail() {
                   className="btn btn_primary mt-5 ltr:mr-2 rtl:ml-2 uppercase"
                   type="submit"
                 >
-                  Laporkan
+                  Simpan
                 </button>
                 {loading && (
                   <span className="pl-3 mt-5">
@@ -457,4 +491,8 @@ export default function UserDetail() {
       </div>
     </UserLayout>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  return { props: { params } };
 }

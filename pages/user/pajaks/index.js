@@ -1,20 +1,37 @@
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import UserLayout from "../../../components/layouts/user/UserLayout";
+import UserPajaksTable from "../../../components/tables/UserPajaksTable";
 import { Store } from "../../../utils/Store";
+import "moment/locale/id";
 
-export default function UserBangunan() {
+export default function UserLists() {
   const router = useRouter();
-  const { redirect } = router.query;
-  const { state, dispatch } = useContext(Store);
+  const { state } = useContext(Store);
   const { userInfo } = state;
+  const [users, setUsers] = useState([]);
+  const [cari, setCari] = useState("");
 
   useEffect(() => {
     if (!userInfo) {
       router.push("/");
+    } else {
+      const fetchUsers = async () => {
+        try {
+          const res = await axios.get(`/api/user/pajaks?cari=${cari}`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setUsers(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchUsers();
     }
-  });
+  }, [cari]);
 
   return (
     <UserLayout title="Pajak">
@@ -64,6 +81,8 @@ export default function UserBangunan() {
                 type="text"
                 className="form-control border-none"
                 placeholder="Cari"
+                value={cari}
+                onChange={(e) => setCari(e.target.value)}
               />
               <button
                 type="button"
@@ -73,22 +92,6 @@ export default function UserBangunan() {
           </form>
 
           <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Sort By --> */}
-            <div className="dropdown lg:ltr:ml-2 lg:rtl:mr-2">
-              <button
-                className="btn btn_outlined btn_secondary uppercase"
-                data-toggle="dropdown-menu"
-                aria-expanded="false"
-              >
-                Urut Berdasarkan
-                <span className="ltr:ml-3 rtl:mr-3 las las-caret-down text-xl leading-none"></span>
-              </button>
-              <div className="dropdown-menu">
-                <a href="#">Ascending</a>
-                <a href="#">Descending</a>
-              </div>
-            </div>
-
             {/* <!-- Add New --> */}
             <Link href="/user/pajaks/add" passHref>
               <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
@@ -99,298 +102,7 @@ export default function UserBangunan() {
         </div>
       </section>
 
-      {/* <!-- List --> */}
-      <div className="card p-5">
-        <div className="overflow-x-auto">
-          <table className="table table-auto table_hoverable w-full">
-            <thead>
-              <tr>
-                <th className="w-px">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" defaultChecked="" partial="" />
-                    <span></span>
-                  </label>
-                </th>
-                <th className="w-1/5 ltr:text-left rtl:text-right uppercase">
-                  Volume/Tonase
-                </th>
-                <th className="text-center uppercase">Nilai Jual</th>
-                <th className="text-center uppercase">Total Jual</th>
-                <th className="text-center uppercase">10% Pajak</th>
-                <th className="text-center uppercase">Batas Pembayaran</th>
-                <th className="text-center uppercase">Status</th>
-                <th className="uppercase"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>10 Kg</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">Rp30.000.000</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="text-center">
-                  <div className="badge badge_danger uppercase">Denda</div>
-                </td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_success"
-                    >
-                      <span className="las las-money-bill"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>10 Kg</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">Rp30.000.000</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="text-center">
-                  <div className="badge badge_warning uppercase">Kurang</div>
-                </td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_success"
-                    >
-                      <span className="las las-money-bill"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>10 Kg</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">Rp30.000.000</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="text-center">
-                  <div className="badge badge_info uppercase">Proses</div>
-                </td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_success"
-                    >
-                      <span className="las las-money-bill"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="custom-checkbox">
-                    <input type="checkbox" data-toggle="rowSelection" />
-                    <span></span>
-                  </label>
-                </td>
-                <td>10 Kg</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">Rp30.000.000</td>
-                <td className="text-center">Rp3.000.000</td>
-                <td className="text-center">December 15, 2019</td>
-                <td className="text-center">
-                  <div className="badge badge_success uppercase">Dibayar</div>
-                </td>
-                <td className="ltr:text-right rtl:text-left whitespace-nowrap">
-                  <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_success"
-                    >
-                      <span className="las las-money-bill"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_info ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-info-circle"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-pen-fancy"></span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-                    >
-                      <span className="las las-trash-alt"></span>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        {/* <!-- Pagination --> */}
-        <div className="card lg:flex">
-          <nav className="flex flex-wrap p-5">
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_primary"
-            >
-              Awal
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_primary"
-            >
-              1
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              2
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              3
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              4
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_outlined btn_secondary"
-            >
-              5
-            </a>
-            <a
-              href="#"
-              className="btn ltr:mr-2 rtl:ml-2 mb-2 lg:mb-0 btn_secondary"
-            >
-              Akhir
-            </a>
-          </nav>
-          <div className="flex items-center ltr:ml-auto rtl:mr-auto p-5 border-t lg:border-t-0 border-gray-200 dark:border-gray-900">
-            Menampilkan 1-5 of 100 item
-          </div>
-          <div className="flex items-center p-5 border-t lg:border-t-0 lg:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
-            <span className="ltr:mr-2 rtl:ml-2">Tampil</span>
-            <div className="dropdown">
-              <button
-                className="btn btn_outlined btn_secondary"
-                data-toggle="dropdown-menu"
-                aria-expanded="false"
-              >
-                5
-                <span className="ltr:ml-3 rtl:mr-3 las las-caret-down text-xl leading-none"></span>
-              </button>
-              <div className="dropdown-menu">
-                <a href="#">5</a>
-                <a href="#">10</a>
-                <a href="#">15</a>
-              </div>
-            </div>
-            <span className="ltr:ml-2 rtl:mr-2">item</span>
-          </div>
-        </div>
-      </div>
-
-      {/* <!-- Footer Bar --> */}
-      <div className="footer-bar">
-        <div className="flex items-center uppercase">
-          <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
-            1
-          </span>
-          Item Terpilih
-        </div>
-        <div className="ltr:ml-auto rtl:mr-auto">
-          <button className="btn btn_danger uppercase">
-            <span className="las las-trash-alt text-xl leading-none ltr:mr-2 rtl:ml-2"></span>
-            Hapus
-          </button>
-        </div>
-      </div>
+      <UserPajaksTable data={users} />
     </UserLayout>
   );
 }

@@ -314,7 +314,7 @@ function Table({
   );
 }
 
-function BasicTable({ data }) {
+function UsersTable({ data }) {
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
@@ -421,4 +421,4 @@ function BasicTable({ data }) {
   return <Table columns={columns} data={data} />;
 }
 
-export default BasicTable;
+export default UsersTable;

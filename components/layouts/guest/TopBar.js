@@ -275,7 +275,7 @@ function TopBar({ title }) {
   return (
     <section className="top-bar">
       {/* <!-- Brand --> */}
-      <span className="brand">Taxbird</span>
+      <span className="brand">i-Tax Walet</span>
 
       <nav className="flex items-center ltr:ml-auto rtl:mr-auto">
         {/* <!-- Dark Mode --> */}
@@ -301,12 +301,12 @@ function TopBar({ title }) {
         </>
 
         {/* <!-- Register/Login --> */}
-        <a
+        {/* <a
           className="btn btn_primary uppercase ltr:ml-5 rtl:mr-5 cursor-pointer"
           onClick={() => router.push(aksi.linkAksi)}
         >
           {aksi.jdlAksi}
-        </a>
+        </a> */}
       </nav>
     </section>
   );

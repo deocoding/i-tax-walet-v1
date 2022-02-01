@@ -15,7 +15,13 @@ handler.get(async (req, res) => {
     .sort({ _id: -1 })
     .limit(1);
   if (bangunan) {
-    res.status(200).json({ latAkhir: bangunan.lat, longAkhir: bangunan.long });
+    res
+      .status(200)
+      .json({
+        latAkhir: bangunan.lat,
+        longAkhir: bangunan.long,
+        statusTerakhir: bangunan.status,
+      });
   }
   await db.disconnect();
 });

@@ -1,26 +1,27 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import UserLayout from "../../../components/layouts/user/UserLayout";
-import { Store } from "../../../utils/Store";
+import AdminLayout from "../../../../components/layouts/admin/AdminLayout";
+import { Store } from "../../../../utils/Store";
 import DatePicker, { registerLocale } from "react-datepicker";
 import id from "date-fns/locale/id";
 registerLocale("id", id);
-import { useForm } from "react-hook-form";
-import { getError } from "../../../utils/error";
+import { useForm, Controller } from "react-hook-form";
+import { getError } from "../../../../utils/error";
 import axios from "axios";
 import Image from "next/image";
 import NumberFormat from "react-number-format";
 
-export default function UserDetail() {
+export default function PajakDetail({ params }) {
+  const pajakId = params.id;
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
 
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState();
   const [loading, setLoading] = useState(false);
   const [iconCheck, setIconCheck] = useState(false);
 
-  const [pajak, setPajak] = useState();
+  const [pajak, setPajak] = useState([]);
 
   const [loadingImage, setLoadingImage] = useState(false);
   const [checkImage, setCheckImage] = useState(false);
@@ -28,17 +29,17 @@ export default function UserDetail() {
   const [btnTambah, setBtnTambah] = useState(false);
   const [btnHapus, setBtnHapus] = useState(false);
 
+  const [user, setUser] = useState([]);
+
   const {
     register,
     formState: { errors },
     setValue,
-    setFocus,
     handleSubmit,
   } = useForm();
 
   const {
     register: register2,
-    formState: { errors: errors2 },
     handleSubmit: handleSubmit2,
     setValue: setValue2,
   } = useForm();
@@ -47,32 +48,70 @@ export default function UserDetail() {
     if (!userInfo) {
       router.push("/");
     } else {
-      setValue("tgglJul", new Date());
+      const fetchPajak = async () => {
+        try {
+          const { data } = await axios.get(`/api/admin/pajaks/${pajakId}`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+
+          setPajak(data);
+
+          setStartDate(new Date(data.tgglJul));
+
+          setValue("volTon", data.volTon);
+          setValue("pajakId", data._id);
+          setValue("userId2", data.user);
+          setValue2("userId", data.user);
+          setValue("nilJul", data.nilJul);
+          setValue("tgglJul", data.tgglJul);
+          setValue2("pajakId", data._id);
+          if (data.fotoJual) {
+            setGambarJual(data.fotoJual);
+            setBtnHapus(true);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      const fetchUsers = async () => {
+        try {
+          const res = await axios.get(`/api/admin/users/`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          setUser(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchUsers();
+      fetchPajak();
     }
   }, []);
 
-  const pajakHandler = async ({ volTon, nilJul, tgglJul }) => {
+  const pajakHandler = async ({ pajakId, userId, volTon, nilJul, tgglJul }) => {
     try {
       setLoading(true);
-      const { data } = await axios.post(
-        `/api/user/pajaks`,
-        { volTon, nilJul, tgglJul },
+      const { data } = await axios.put(
+        `/api/admin/pajaks/`,
+        { pajakId, userId, volTon, nilJul, tgglJul },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       if (data) {
-        setValue("volTon", "");
-        setValue("nilJul", "");
-        setValue("tgglJul", new Date());
-        setValue2("pajakId", data._id);
+        setPajak(data);
+        setValue("volTon", data.volTon);
+        setValue("nilJul", data.nilJul);
+        defaultValues("userId", data.user);
+        setValue("tgglJul", data.tgglJul);
+        setStartDate(new Date(data.tgglJul));
         setIconCheck(true);
         setLoading(false);
         setTimeout(async () => {
           setIconCheck(false);
-          setFocus("volTon");
         }, 1500);
-        setPajak(data);
       }
     } catch (err) {
       alert(getError(err));
@@ -156,17 +195,34 @@ export default function UserDetail() {
     }
   }
 
+  const pilihUser = () => (
+    <select value={pajak.user}>
+      {user &&
+        user.map((usr) => (
+          <option
+            key={usr._id}
+            value={usr._id === pajak.user && true}
+            // selected={usr._id === pajak.user && true}
+          >
+            {usr.namaLengkap}
+          </option>
+        ))}
+    </select>
+  );
+
   return (
-    <UserLayout title="Pajak">
+    <AdminLayout title="Pajak">
       {/* <!-- Breadcrumb --> */}
       <section className="breadcrumb">
         <h1>Pajak</h1>
         <ul>
           <li>
-            <span>User</span>
+            <span>Admin</span>
           </li>
           <li className="divider las las-arrow-right"></li>
-          <li>Tambah Pajak</li>
+          <li>Ubah Pajak</li>
+          <li className="divider las las-arrow-right"></li>
+          <li>{pajakId}</li>
         </ul>
       </section>
 
@@ -182,6 +238,63 @@ export default function UserDetail() {
               </nav>
             </div>
             <form onSubmit={handleSubmit(pajakHandler)}>
+              <input hidden {...register("pajakId", { required: true })} />
+              <div className="mb-5">
+                <label className="label block mb-2" htmlFor="userId">
+                  User
+                </label>
+                <div className="custom-select">
+                  {pilihUser()}
+                  {/* <select
+                    value={pajak.user}
+                    defaultValue={""}
+                    onChange={(values) => {
+                      const { formattedValue, value } = values;
+                      // formattedValue = $2,223
+                      // value ie, 2223
+                      setValue("userId", value);
+                    }}
+                  >
+                    <option value="">pilih user...</option>
+                    {user &&
+                      user.map((usr) => (
+                        <option
+                          key={usr._id}
+                          value={usr._id}
+                          // selected={usr._id === pajak.user ? !0 : !1}
+                        >
+                          {usr.namaLengkap}
+                        </option>
+                      ))}
+                  </select> */}
+                  {/* <select
+                    id="userId2"
+                    name="userId2"
+                    {...register("userId2", { required: true })}
+                    className="form-control"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Pilih user...
+                    </option>
+                    {user &&
+                      user.map((usr) => (
+                        <option
+                          key={usr._id}
+                          value={usr._id}
+                          selected={usr._id === pajak.user ? !0 : !1}
+                        >
+                          {usr.namaLengkap}
+                        </option>
+                      ))}
+                  </select> */}
+                  <div className="custom-select-icon las las-caret-down"></div>
+                </div>
+                <small className="block my-2 invalid-feedback">
+                  {errors.userId?.type === "required" &&
+                    "Field diatas tidak boleh kosong"}
+                </small>
+              </div>
               <div className="mb-5">
                 <label className="label block mb-2" htmlFor="volTon">
                   Volume/Tonase (Kg)
@@ -190,7 +303,6 @@ export default function UserDetail() {
                   id="volTon"
                   type="number"
                   className="form-control"
-                  autoFocus={!0}
                   {...register("volTon", { required: true })}
                 />
                 <small className="block my-2 invalid-feedback">
@@ -202,8 +314,21 @@ export default function UserDetail() {
                 <label className="label block mb-2" htmlFor="nilJul">
                   Nilai Jual per Kg (Rp)
                 </label>
+                {/* <Controller
+                  control={control}
+                  {...register("nilJul", { required: true })}
+                  render={({ field: { onChange, name, value } }) => (
+                    <NumberFormat
+                      thousandSeparator={true}
+                      className="form-control"
+                      value={value}
+                      onChange={onChange}
+                    />
+                  )}
+                /> */}
                 <NumberFormat
                   name="nilJul"
+                  value={pajak.nilJul}
                   className="form-control"
                   thousandSeparator={true}
                   {...register("nilJul", { required: true })}
@@ -214,12 +339,6 @@ export default function UserDetail() {
                     setValue("nilJul", value);
                   }}
                 />
-                {/* <input
-                  id="nilJul"
-                  type="number"
-                  className="form-control"
-                  {...register("nilJul", { required: true })}
-                /> */}
                 <small className="block my-2 invalid-feedback">
                   {errors.nilJul?.type === "required" &&
                     "Field diatas tidak boleh kosong"}
@@ -252,7 +371,7 @@ export default function UserDetail() {
                   className="btn btn_primary mt-5 ltr:mr-2 rtl:ml-2 uppercase"
                   type="submit"
                 >
-                  Laporkan
+                  Simpan
                 </button>
                 {loading && (
                   <span className="pl-3 mt-5">
@@ -455,6 +574,10 @@ export default function UserDetail() {
           </div>
         </div>
       </div>
-    </UserLayout>
+    </AdminLayout>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  return { props: { params } };
 }

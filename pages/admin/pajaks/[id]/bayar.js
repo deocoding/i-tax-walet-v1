@@ -1,17 +1,20 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import UserLayout from "../../../components/layouts/user/UserLayout";
-import { Store } from "../../../utils/Store";
+import UserLayout from "../../../../components/layouts/user/UserLayout";
+import { Store } from "../../../../utils/Store";
 import DatePicker, { registerLocale } from "react-datepicker";
 import id from "date-fns/locale/id";
 registerLocale("id", id);
-import { useForm } from "react-hook-form";
-import { getError } from "../../../utils/error";
+import { useForm, Controller } from "react-hook-form";
+import { getError } from "../../../../utils/error";
 import axios from "axios";
 import Image from "next/image";
 import NumberFormat from "react-number-format";
+import Moment from "react-moment";
+import "moment/locale/id";
 
-export default function UserDetail() {
+export default function PajakDetail({ params }) {
+  const pajakId = params.id;
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -20,7 +23,7 @@ export default function UserDetail() {
   const [loading, setLoading] = useState(false);
   const [iconCheck, setIconCheck] = useState(false);
 
-  const [pajak, setPajak] = useState();
+  const [pajak, setPajak] = useState({});
 
   const [loadingImage, setLoadingImage] = useState(false);
   const [checkImage, setCheckImage] = useState(false);
@@ -30,6 +33,7 @@ export default function UserDetail() {
 
   const {
     register,
+    control,
     formState: { errors },
     setValue,
     setFocus,
@@ -47,30 +51,50 @@ export default function UserDetail() {
     if (!userInfo) {
       router.push("/");
     } else {
-      setValue("tgglJul", new Date());
+      const fetchPajak = async () => {
+        try {
+          const { data } = await axios.get(`/api/user/pajaks/${pajakId}`, {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          });
+          if (data) {
+            setPajak(data);
+            setValue("pajakId", data._id);
+            setValue2("pajakId", data._id);
+            if (data.tgglBay) {
+              setStartDate(new Date(data.tgglBay));
+              setValue("tgglBay", new Date());
+            }
+            if (data.fotoBayar) {
+              setGambarJual(data.fotoBayar);
+              setBtnHapus(true);
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchPajak();
     }
   }, []);
 
-  const pajakHandler = async ({ volTon, nilJul, tgglJul }) => {
+  const pajakHandler = async ({ pajakId, totBay, tgglBay }) => {
     try {
       setLoading(true);
-      const { data } = await axios.post(
-        `/api/user/pajaks`,
-        { volTon, nilJul, tgglJul },
+      const { data } = await axios.put(
+        `/api/user/pajaks/bayar`,
+        { pajakId, totBay, tgglBay },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
       );
       if (data) {
-        setValue("volTon", "");
-        setValue("nilJul", "");
-        setValue("tgglJul", new Date());
-        setValue2("pajakId", data._id);
+        setValue("totBay", data.totBay);
+        setValue("tgglBay", new Date(data.tgglBay));
+        setStartDate(new Date(data.tgglBay));
         setIconCheck(true);
         setLoading(false);
         setTimeout(async () => {
           setIconCheck(false);
-          setFocus("volTon");
         }, 1500);
         setPajak(data);
       }
@@ -115,7 +139,7 @@ export default function UserDetail() {
   const imageHandler = async ({ pajakId, gambar }) => {
     try {
       setLoadingImage(true);
-      const { data } = await axios.put("/api/user/pajaks/jual-image", {
+      const { data } = await axios.put("/api/user/pajaks/bayar-image", {
         pajakId,
         gambar,
       });
@@ -137,7 +161,7 @@ export default function UserDetail() {
   async function hapusGambarHandler(namaFile, pajakId) {
     try {
       setLoadingImage(true);
-      const { data } = await axios.put("/api/user/pajaks/delete-jual-image", {
+      const { data } = await axios.put("/api/user/pajaks/delete-bayar-image", {
         namaFile,
         pajakId,
       });
@@ -166,7 +190,9 @@ export default function UserDetail() {
             <span>User</span>
           </li>
           <li className="divider las las-arrow-right"></li>
-          <li>Tambah Pajak</li>
+          <li>Pembayaran Pajak</li>
+          <li className="divider las las-arrow-right"></li>
+          <li>{pajakId}</li>
         </ul>
       </section>
 
@@ -177,73 +203,94 @@ export default function UserDetail() {
             <div className="tabs mb-5">
               <nav className="tab-nav">
                 <button className="nav-link h5 uppercase active">
-                  Detail Penjualan
+                  Detail Pembayaran
                 </button>
               </nav>
             </div>
-            <form onSubmit={handleSubmit(pajakHandler)}>
-              <div className="mb-5">
-                <label className="label block mb-2" htmlFor="volTon">
-                  Volume/Tonase (Kg)
-                </label>
-                <input
-                  id="volTon"
-                  type="number"
-                  className="form-control"
-                  autoFocus={!0}
-                  {...register("volTon", { required: true })}
-                />
-                <small className="block my-2 invalid-feedback">
-                  {errors.volTon?.type === "required" &&
-                    "Field diatas tidak boleh kosong"}
-                </small>
+            <div className="px-10 py-5 mb-5 flex justify-between bg-sky-800 text-slate-200 rounded-xl">
+              <div>
+                <h4 className="mb-2 uppercase text-white">Pelaporan</h4>
+                <p className="leading-relaxed">
+                  Volume/Tonase : {pajak.volTon} kg
+                  <br />
+                  Nilai Jual per kg :{" "}
+                  <NumberFormat
+                    value={pajak.nilJul}
+                    displayType={"text"}
+                    thousandSeparator={true}
+                    prefix={"Rp"}
+                  />
+                  <br />
+                  Total Penjualan :{" "}
+                  <NumberFormat
+                    value={pajak.totJual}
+                    displayType={"text"}
+                    thousandSeparator={true}
+                    prefix={"Rp"}
+                  />
+                </p>
               </div>
+
+              <div className="ltr:text-right rtl:text-left">
+                <h4 className="mb-2 uppercase text-white">Kewajiban</h4>
+                <p className="leading-relaxed">
+                  Pajak 10% :{" "}
+                  <NumberFormat
+                    value={pajak.totPajak}
+                    displayType={"text"}
+                    thousandSeparator={true}
+                    prefix={"Rp"}
+                  />
+                  <br />
+                  Batas Pembayaran : <Moment fromNow>{pajak.batBay}</Moment>
+                  <br />
+                  Keterlambatan dikenakan denda 2%
+                </p>
+              </div>
+            </div>
+            <form onSubmit={handleSubmit(pajakHandler)}>
+              <input hidden {...register("pajakId", { required: true })} />
               <div className="mb-5">
-                <label className="label block mb-2" htmlFor="nilJul">
-                  Nilai Jual per Kg (Rp)
+                <label className="label block mb-2" htmlFor="totBay">
+                  Total Pembayaran (Rp)
                 </label>
                 <NumberFormat
-                  name="nilJul"
+                  name="totBay"
+                  value={pajak.totBay}
                   className="form-control"
                   thousandSeparator={true}
-                  {...register("nilJul", { required: true })}
+                  {...register("totBay", { required: true })}
                   onValueChange={(values) => {
                     const { formattedValue, value } = values;
                     // formattedValue = $2,223
                     // value ie, 2223
-                    setValue("nilJul", value);
+                    setValue("totBay", value);
                   }}
                 />
-                {/* <input
-                  id="nilJul"
-                  type="number"
-                  className="form-control"
-                  {...register("nilJul", { required: true })}
-                /> */}
                 <small className="block my-2 invalid-feedback">
-                  {errors.nilJul?.type === "required" &&
+                  {errors.totBay?.type === "required" &&
                     "Field diatas tidak boleh kosong"}
                 </small>
               </div>
               <div className="mb-5">
-                <label className="label block mb-2" htmlFor="tgglJul">
-                  Tanggal Jual
+                <label className="label block mb-2" htmlFor="tgglBay">
+                  Pada tanggal
                 </label>
                 <DatePicker
                   locale="id"
                   isClearable
                   innerRef={{
-                    ...register("tgglJul", { required: true }),
+                    ...register("tgglBay", { required: true }),
                   }}
                   className={"form-control"}
                   selected={startDate}
                   onChange={(val) => {
                     setStartDate(val);
-                    setValue("tgglJul", val);
+                    setValue("tgglBay", val);
                   }}
                 />
                 <small className="block my-2 invalid-feedback">
-                  {errors.tgglJul?.type === "required" &&
+                  {errors.tgglBay?.type === "required" &&
                     "Field diatas tidak boleh kosong"}
                 </small>
               </div>
@@ -322,7 +369,7 @@ export default function UserDetail() {
               <div className="tabs px-5 pt-5">
                 <nav className="tab-nav">
                   <button className="nav-link h5 uppercase active">
-                    Foto Nota Penjualan
+                    Foto Bukti Pembayaran
                   </button>
                 </nav>
               </div>
@@ -449,12 +496,33 @@ export default function UserDetail() {
           <div className="relative card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
             <span className="text-primary text-6xl leading-none las las-file-invoice"></span>
             <p className="mt-2 text-xl">Status Pajak</p>
-            <div className="badge badge_outlined badge_secondary uppercase mt-5">
-              <div className="p-2 text-2xl leading-none">Pelaporan</div>
-            </div>
+            {pajak.status === 1 && (
+              <div className="badge badge_secondary uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Pelaporan</div>
+              </div>
+            )}
+            {pajak.status === 2 && (
+              <div className="badge badge_warning uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Kurang Bayar</div>
+              </div>
+            )}
+            {pajak.status === 3 && (
+              <div className="badge badge_danger uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Denda</div>
+              </div>
+            )}
+            {pajak.status === 4 && (
+              <div className="badge badge_success uppercase mt-5">
+                <div className="p-2 text-2xl leading-none">Lunas</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </UserLayout>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  return { props: { params } };
 }

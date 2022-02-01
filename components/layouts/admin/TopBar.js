@@ -283,7 +283,7 @@ function TopBar() {
         onClick={menuBarHandler}
       ></button>
       {/* <!-- Brand --> */}
-      <span className="brand">Taxbird</span>
+      <span className="brand">i-Tax Walet</span>
 
       <div className="flex items-center ltr:ml-auto rtl:mr-auto">
         <span className="mr-2">
