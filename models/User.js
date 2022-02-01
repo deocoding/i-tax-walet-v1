@@ -2,19 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    namaLengkap: { type: String, required: true, index: true },
+    username: { type: String, required: true, index: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    isAdmin: { type: Boolean, required: true, default: false },
+    role: { type: Number, required: true, default: 1 },
     image: { type: String },
-    hpTel: { type: String },
-    npwpd: { type: String, index: true },
-    alamat: {
-      detail: { type: String, index: true },
-      kec: { type: String },
-      kabKot: { type: String, default: "Kota Palangka Raya" },
-    },
-    status: { type: Number, required: true, default: 1 },
   },
   {
     timestamps: true,
@@ -22,9 +14,8 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.index({
-  namaLengkap: "text",
-  npwpd: "text",
-  "alamat.detail": "text",
+  username: "text",
+  email: "text",
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

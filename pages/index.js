@@ -20,35 +20,25 @@ export default function Home() {
     register,
     formState: { errors },
     handleSubmit,
-    setValue,
   } = useForm();
 
-  useState(() => {
+  useEffect(() => {
     if (userInfo) {
-      if (userInfo.isAdmin) {
-        router.push(redirect || "/admin/dashboard");
-      }
-      router.push(redirect || "/user/dashboard");
+      router.push(redirect || "/dashboard");
     }
   });
 
   const loginHandler = async ({ email, password }) => {
     try {
-      const { data } = await axios.post("/api/users/login", {
+      const { data } = await axios.post("/api/login", {
         email,
         password,
       });
       dispatch({ type: "USER_LOGIN", payload: data });
 
       Cookies.set("userInfo", JSON.stringify(data));
-      if (data.isAdmin) {
-        router.push("/admin/dashboard");
-      } else if (!data.isAdmin && !data.alamat) {
-        router.push("/user/detail");
-      } else if (!data.isAdmin && !data.bangunan) {
-        router.push("/user/bangunan");
-      } else {
-        router.push("/user/dashboard");
+      if (data) {
+        router.push("/dashboard");
       }
     } catch (err) {
       alert(getError(err));

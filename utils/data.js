@@ -2,25 +2,28 @@ import bcrypt from "bcryptjs";
 const data = {
   users: [
     {
-      namaLengkap: "Administrator",
+      username: "Superadmin",
+      email: "superadmin@example.com",
+      password: bcrypt.hashSync("superadmin"),
+      role: 1,
+    },
+    {
+      username: "Admin Bapenda",
       email: "admin@example.com",
       password: bcrypt.hashSync("admin"),
-      isAdmin: true,
+      role: 2,
     },
     {
-      namaLengkap: "User 1",
-      email: "user1@example.com",
-      password: bcrypt.hashSync("user1"),
+      username: "Surveyor Bapenda",
+      email: "surveyor@example.com",
+      password: bcrypt.hashSync("surveyor"),
+      role: 3,
     },
     {
-      namaLengkap: "User 2",
-      email: "user2@example.com",
-      password: bcrypt.hashSync("user2"),
-    },
-    {
-      namaLengkap: "User 3",
-      email: "user3@example.com",
-      password: bcrypt.hashSync("user3"),
+      username: "Operator Bapenda",
+      email: "operator@example.com",
+      password: bcrypt.hashSync("operator"),
+      role: 4,
     },
   ],
 };

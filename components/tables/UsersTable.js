@@ -1,17 +1,11 @@
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useState } from "react";
-import Moment from "react-moment";
-import {
-  useTable,
-  usePagination,
-  useRowSelect,
-  useGlobalFilter,
-  useAsyncDebounce,
-} from "react-table";
+import React, { useContext } from "react";
+import { useTable, usePagination, useRowSelect } from "react-table";
 import { getError } from "../../utils/error";
 import { Store } from "../../utils/Store";
+import { COLUMNS } from "./columns";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -106,12 +100,9 @@ function Table({
       return;
     }
     try {
-      const { data } = await axios.delete(
-        `/api/admin/users/delete?ids=${userIds}`,
-        {
-          headers: { authorization: `Bearer ${userInfo.token}` },
-        }
-      );
+      const { data } = await axios.delete(`/api/users/delete?ids=${userIds}`, {
+        headers: { authorization: `Bearer ${userInfo.token}` },
+      });
       alert(data.pesan);
       router.reload();
     } catch (err) {
@@ -332,91 +323,7 @@ function UsersTable({ data }) {
     }
   };
 
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: "Alamat Lengkap",
-        accessor: "alamat.detail",
-        className: "w-1/5 ltr:text-left rtl:text-right uppercase",
-        Cell: ({ row }) => (
-          <>
-            {row.original.alamat.detail
-              ? row.original.alamat.detail
-              : "Belum diisi"}
-          </>
-        ),
-      },
-      {
-        Header: "Nama Lengkap",
-        accessor: "namaLengkap",
-        className: "text-left uppercase",
-      },
-      {
-        Header: "NPWPD",
-        accessor: "npwpd",
-        className: "text-center uppercase",
-        classNameCell: "text-center",
-        Cell: ({ row }) => (
-          <>{row.original.npwpd ? row.original.npwpd : "Dalam proses"}</>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        className: "text-center uppercase",
-        classNameCell: "text-center",
-        Cell: ({ row }) => (
-          <>
-            {row.original.status === 1 && (
-              <div className="badge badge_outlined badge_secondary uppercase">
-                Pendaftaran
-              </div>
-            )}
-            {row.original.status === 2 && (
-              <div className="badge badge_outlined badge_info uppercase">
-                Pendataan
-              </div>
-            )}
-            {row.original.status === 3 && (
-              <div className="badge badge_outlined badge_success uppercase">
-                Valid
-              </div>
-            )}
-          </>
-        ),
-      },
-      {
-        Header: "Tanggal Daftar",
-        accessor: "createdAt",
-        className: "text-center uppercase",
-        classNameCell: "text-center",
-        Cell: ({ row }) => (
-          <Moment format="lll">{row.original.createdAt}</Moment>
-        ),
-      },
-      {
-        Header: () => null,
-        id: "aksi",
-        classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
-        Cell: ({ row }) => (
-          <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-            <Link href={`/admin/users/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_outlined btn_secondary">
-                <span className="las las-pen-fancy"></span>
-              </a>
-            </Link>
-            <a
-              onClick={() => deleteHandler(row.original._id)}
-              className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-trash-alt"></span>
-            </a>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
+  const columns = React.useMemo(() => COLUMNS, []);
 
   return <Table columns={columns} data={data} />;
 }

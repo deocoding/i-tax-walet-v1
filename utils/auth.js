@@ -6,7 +6,7 @@ const signToken = (user) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      role: user.role,
     },
 
     process.env.JWT_SECRET,
@@ -32,12 +32,26 @@ const isAuth = async (req, res, next) => {
     res.status(401).send({ message: "Token is not suppiled" });
   }
 };
+const isSuperAdmin = async (req, res, next) => {
+  if (req.user.role === 1) {
+    next();
+  } else {
+    res.status(401).send({ message: "User is not superadmin" });
+  }
+};
 const isAdmin = async (req, res, next) => {
-  if (req.user.isAdmin) {
+  if (req.user.role === 2) {
     next();
   } else {
     res.status(401).send({ message: "User is not admin" });
   }
 };
+const isSurveyor = async (req, res, next) => {
+  if (req.user.role === 3) {
+    next();
+  } else {
+    res.status(401).send({ message: "User is not surveyor" });
+  }
+};
 
-export { signToken, isAuth, isAdmin };
+export { signToken, isAuth, isSuperAdmin, isAdmin, isSurveyor };
