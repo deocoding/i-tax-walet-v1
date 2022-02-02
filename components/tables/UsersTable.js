@@ -1,4 +1,5 @@
 import axios from "axios";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext } from "react";
@@ -100,7 +101,7 @@ function Table({
       return;
     }
     try {
-      const { data } = await axios.delete(`/api/users/delete?ids=${userIds}`, {
+      const { data } = await axios.delete(`/api/users?ids=${userIds}`, {
         headers: { authorization: `Bearer ${userInfo.token}` },
       });
       alert(data.pesan);
@@ -306,26 +307,10 @@ function Table({
 }
 
 function UsersTable({ data }) {
-  const router = useRouter();
-  const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
-  const deleteHandler = async (userId) => {
-    if (!window.confirm("Yakin dihapus?")) {
-      return;
-    }
-    try {
-      await axios.delete(`/api/admin/users/${userId}`, {
-        headers: { authorization: `Bearer ${userInfo.token}` },
-      });
-      router.reload();
-    } catch (err) {
-      alert(getError(err));
-    }
-  };
-
   const columns = React.useMemo(() => COLUMNS, []);
 
   return <Table columns={columns} data={data} />;
 }
 
-export default UsersTable;
+// export default UsersTable;
+export default dynamic(() => Promise.resolve(UsersTable), { ssr: false });

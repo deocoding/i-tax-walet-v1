@@ -30,17 +30,11 @@ export const COLUMNS = [
     classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
     Cell: ({ row }) => (
       <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-        <Link href={`/admin/users/${row.original._id}`} passHref>
+        <Link href={`/users/${row.original._id}`} passHref>
           <a className="btn btn-icon btn_outlined btn_secondary">
             <span className="las las-pen-fancy"></span>
           </a>
         </Link>
-        <a
-          onClick={() => deleteHandler(row.original._id)}
-          className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
-        >
-          <span className="las las-trash-alt"></span>
-        </a>
       </div>
     ),
   },

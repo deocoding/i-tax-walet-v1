@@ -7,7 +7,7 @@ import AppLayout from "../../components/layouts/app/AppLayout";
 import UsersTable from "../../components/tables/UsersTable";
 import { Store } from "../../utils/Store";
 
-function UserLists() {
+function Users() {
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
@@ -109,4 +109,4 @@ function UserLists() {
   );
 }
 
-export default dynamic(() => Promise.resolve(UserLists), { ssr: false });
+export default dynamic(() => Promise.resolve(Users), { ssr: false });
