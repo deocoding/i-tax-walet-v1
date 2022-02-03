@@ -31,7 +31,7 @@ function ObjekPajaksAdd() {
     } else {
       const fetchWajibPajaks = async () => {
         try {
-          const { data } = await axios.get(`/api/objek-pajaks/wp-all`, {
+          const { data } = await axios.get(`/api/wajib-pajaks/wp-all`, {
             headers: {
               authorization: `Bearer ${userInfo.token}`,
             },

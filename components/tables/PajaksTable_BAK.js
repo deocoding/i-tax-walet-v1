@@ -1,19 +1,18 @@
 import axios from "axios";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Moment from "react-moment";
-import NumberFormat from "react-number-format";
 import {
   useTable,
   usePagination,
   useRowSelect,
   useGlobalFilter,
+  useAsyncDebounce,
 } from "react-table";
 import { getError } from "../../utils/error";
 import { Store } from "../../utils/Store";
-import { GlobalFilter } from "./GlobalFilter";
+import NumberFormat from "react-number-format";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -65,14 +64,12 @@ function Table({
     setPageSize,
     selectedFlatRows,
     state: { pageIndex, pageSize, selectedRowIds },
-    setGlobalFilter,
   } = useTable(
     {
       columns,
       data,
       initialState: { pageSize: 5 },
     },
-    useGlobalFilter,
     usePagination,
     useRowSelect,
     (hooks) => {
@@ -105,14 +102,17 @@ function Table({
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
 
-  const deleteAllHandler = async (pajaksIds) => {
+  const deleteAllHandler = async (pajakIds) => {
     if (!window.confirm("Yakin dihapus?")) {
       return;
     }
     try {
-      const { data } = await axios.delete(`/api/pajaks?ids=${pajaksIds}`, {
-        headers: { authorization: `Bearer ${userInfo.token}` },
-      });
+      const { data } = await axios.delete(
+        `/api/user/pajaks/delete?ids=${pajakIds}`,
+        {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        }
+      );
       alert(data.pesan);
       router.reload();
     } catch (err) {
@@ -120,62 +120,9 @@ function Table({
     }
   };
 
-  const { globalFilter } = state;
-
   // Render the UI for your table
   return (
     <>
-      <section className="breadcrumb lg:flex items-start">
-        <div>
-          <h1>Pajak</h1>
-          <ul>
-            <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
-              </a>
-            </li>
-            <li className="divider las las-arrow-right"></li>
-            <li>Daftar Pajak</li>
-          </ul>
-        </div>
-
-        <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
-          {/* <!-- Search --> */}
-          <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-
-          <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Add New --> */}
-            <Link href="/pajaks/add" passHref>
-              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-                Tambah Baru
-              </button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <div className="card p-5">
         <div className="overflow-x-auto">
           <table
@@ -368,26 +315,48 @@ function Table({
   );
 }
 
-function WajibPajaksTable({ data }) {
+function PajaksTable({ data }) {
+  const router = useRouter();
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+  const deleteHandler = async (pajakId) => {
+    if (!window.confirm("Yakin dihapus?")) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/user/pajaks/${pajakId}`, {
+        headers: { authorization: `Bearer ${userInfo.token}` },
+      });
+      router.reload();
+    } catch (err) {
+      alert(getError(err));
+    }
+  };
+
   const columns = React.useMemo(
     () => [
       {
-        Header: "Nama Pemilik",
-        accessor: "namaPemilik",
-        className: "w-1/5 ltr:text-left rtl:text-right uppercase",
+        Header: "NPWPD",
+        accessor: "user.npwpd",
+        className: "ltr:text-left rtl:text-right uppercase",
+        Cell: ({ row }) =>
+          row.original.user.map((e) => (e.npwpd ? e.npwpd : "Dalam Proses")),
       },
       {
-        Header: "NPWPD",
-        accessor: "npwpd",
-        className: "text-left uppercase",
+        Header: "Nama Lengkap",
+        accessor: "user.namaLengkap",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
+        Cell: ({ row }) => row.original.user.map((e) => e.namaLengkap),
       },
       {
         Header: "Total Jual",
-        accessor: "nilJual",
-        className: "text-left uppercase",
+        accessor: "totJual",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
         Cell: ({ row }) => (
           <NumberFormat
-            value={row.original.nilJual}
+            value={row.original.totJual}
             displayType={"text"}
             thousandSeparator={true}
             prefix={"Rp"}
@@ -395,9 +364,10 @@ function WajibPajaksTable({ data }) {
         ),
       },
       {
-        Header: "Total Pajak",
+        Header: "10% Pajak",
         accessor: "totPajak",
-        className: "text-left uppercase",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
         Cell: ({ row }) => (
           <NumberFormat
             value={row.original.totPajak}
@@ -408,30 +378,40 @@ function WajibPajaksTable({ data }) {
         ),
       },
       {
-        Header: "Total Bayar",
-        accessor: "jumBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <NumberFormat
-            value={row.original.jumBayar}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"Rp"}
-          />
-        ),
+        Header: "Tanggal Lapor",
+        accessor: "tgglJul",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
+        Cell: ({ row }) => <Moment format="lll">{row.original.tgglJul}</Moment>,
       },
       {
-        Header: "Tanggal Bayar",
-        accessor: "tgglBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <Moment format="lll">{row.original.tgglBayar}</Moment>
-        ),
+        Header: "Batas Bayar",
+        accessor: "batBay",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
+        Cell: ({ row }) => <Moment format="lll">{row.original.batBay}</Moment>,
       },
       {
-        Header: "Status Pajak",
-        accessor: "sttsPajak",
-        className: "text-left uppercase",
+        Header: "Status",
+        accessor: "status",
+        className: "text-center uppercase",
+        classNameCell: "text-center",
+        Cell: ({ row }) => (
+          <>
+            {row.original.status === 1 && (
+              <div className="badge badge_secondary uppercase">Pelaporan</div>
+            )}
+            {row.original.status === 2 && (
+              <div className="badge badge_warning uppercase">Kurang Bayar</div>
+            )}
+            {row.original.status === 3 && (
+              <div className="badge badge_danger uppercase">Denda</div>
+            )}
+            {row.original.status === 4 && (
+              <div className="badge badge_success uppercase">Lunas</div>
+            )}
+          </>
+        ),
       },
       {
         Header: () => null,
@@ -439,11 +419,22 @@ function WajibPajaksTable({ data }) {
         classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
         Cell: ({ row }) => (
           <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-            <Link href={`/pajaks/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_outlined btn_secondary">
+            <Link href={`/admin/pajaks/${row.original._id}/bayar`} passHref>
+              <a className="btn btn-icon btn_outlined btn_success">
+                <span className="las las-money-bill"></span>
+              </a>
+            </Link>
+            <Link href={`/admin/pajaks/${row.original._id}`} passHref>
+              <a className="btn btn-icon btn_outlined btn_secondary ltr:ml-2 rtl:mr-2">
                 <span className="las las-pen-fancy"></span>
               </a>
             </Link>
+            <a
+              onClick={() => deleteHandler(row.original._id)}
+              className="btn btn-icon btn_outlined btn_danger ltr:ml-2 rtl:mr-2"
+            >
+              <span className="las las-trash-alt"></span>
+            </a>
           </div>
         ),
       },
@@ -454,4 +445,4 @@ function WajibPajaksTable({ data }) {
   return <Table columns={columns} data={data} />;
 }
 
-export default dynamic(() => Promise.resolve(WajibPajaksTable), { ssr: false });
+export default PajaksTable;
