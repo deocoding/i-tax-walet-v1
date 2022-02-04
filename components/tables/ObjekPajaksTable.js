@@ -395,11 +395,21 @@ function WajibPajaksTable({ data }) {
       {
         Header: () => null,
         id: "aksi",
-        classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
+        classNameCell: "ltr:text-right rtl:text-left",
         Cell: ({ row }) => (
-          <div className="inline-flex ltr:ml-auto rtl:mr-auto">
+          <div className="inline-flex ltr:ml-auto rtl:mr-auto justify-center items-center">
+            <Link href={`/objek-pajaks/survey/${row.original._id}`} passHref>
+              <a className="btn btn-icon btn_info ml-3">
+                <span className="las las-chart-line"></span>
+              </a>
+            </Link>
+            <Link href={`/objek-pajaks/pendataan/${row.original._id}`} passHref>
+              <a className="btn btn-icon btn_info ml-3">
+                <span className="las las-map-marked-alt"></span>
+              </a>
+            </Link>
             <Link href={`/objek-pajaks/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_outlined btn_secondary">
+              <a className="btn btn-icon btn_outlined btn_secondary ml-3">
                 <span className="las las-pen-fancy"></span>
               </a>
             </Link>

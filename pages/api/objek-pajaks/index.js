@@ -2,6 +2,7 @@ import nc from "next-connect";
 import { isAuth } from "../../../utils/auth";
 import ObjekPajak from "../../../models/ObjekPajak";
 import db from "../../../utils/db";
+import moment from "moment";
 
 const handler = nc();
 handler.use(isAuth);
@@ -33,12 +34,18 @@ handler.get(async (req, res) => {
 
 handler.post(async (req, res) => {
   await db.connect();
+  const usia = moment(new Date())
+    .diff(req.body.tgglSimb, "years", true)
+    .toFixed(1);
   const newObjekPajak = new ObjekPajak({
     wajibPajak: req.body.wajibPajak,
     alamatLengkap: req.body.alamatLengkap,
     kec: req.body.kec,
     simb: req.body.simb,
+    tgglSimb: req.body.tgglSimb,
     situ: req.body.situ,
+    tgglSitu: req.body.tgglSitu,
+    usia: usia,
   });
   const objekPajak = await newObjekPajak.save();
   await db.disconnect();
@@ -67,13 +74,19 @@ handler.delete(async (req, res) => {
 
 handler.put(async (req, res) => {
   await db.connect();
+  const usia = moment(new Date())
+    .diff(req.body.tgglSimb, "years", true)
+    .toFixed(1);
   const objekPajak = await ObjekPajak.findById(req.body.objekPajakId);
   if (objekPajak) {
     objekPajak.wajibPajak = req.body.wajibPajak;
     objekPajak.kec = req.body.kec;
     objekPajak.alamatLengkap = req.body.alamatLengkap;
     objekPajak.simb = req.body.simb;
+    objekPajak.tgglSimb = req.body.tgglSimb;
     objekPajak.situ = req.body.situ;
+    objekPajak.tgglSitu = req.body.tgglSitu;
+    objekPajak.usia = usia;
     const updatedObjekPajak = await objekPajak.save();
 
     await db.disconnect();

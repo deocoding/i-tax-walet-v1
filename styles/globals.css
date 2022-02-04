@@ -2563,3 +2563,11 @@ button:focus {
   margin-right: 0;
   margin-left: 1rem;
 }
+
+.react-datepicker__year-dropdown-container--scroll {
+  margin-left: 20px !important;
+}
+.react-datepicker__month-dropdown-container--scroll {
+  margin-right: 20px !important;
+  margin-left: -15px !important;
+}

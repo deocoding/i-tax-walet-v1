@@ -4,9 +4,11 @@ import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import AppLayout from "../../components/layouts/app/AppLayout";
 import { Store } from "../../utils/Store";
-import { getError } from "../../utils/error";
 import dynamic from "next/dynamic";
-import Image from "next/image";
+
+import DatePicker, { registerLocale } from "react-datepicker";
+import id from "date-fns/locale/id";
+registerLocale("id", id);
 
 function ObjekPajaksAdd() {
   const router = useRouter();
@@ -18,12 +20,16 @@ function ObjekPajaksAdd() {
     formState: { errors },
     handleSubmit,
     setFocus,
+    setValue,
   } = useForm();
 
   const [loading, setLoading] = useState(false);
   const [pesan, setPesan] = useState(false);
   const [objekPajaks, setObjekPajaks] = useState([]);
   const [wajibPajaks, setWajibPajaks] = useState([]);
+
+  const [dateSimb, setDateSimb] = useState();
+  const [dateSitu, setDateSitu] = useState();
 
   useEffect(() => {
     if (!userInfo) {
@@ -53,7 +59,9 @@ function ObjekPajaksAdd() {
     alamatLengkap,
     kec,
     simb,
+    tgglSimb,
     situ,
+    tgglSitu,
   }) => {
     try {
       setLoading(true);
@@ -64,7 +72,9 @@ function ObjekPajaksAdd() {
           alamatLengkap,
           kec,
           simb,
+          tgglSimb,
           situ,
+          tgglSitu,
         },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
@@ -78,6 +88,12 @@ function ObjekPajaksAdd() {
           setObjekPajaks(data);
 
           setFocus("wajibPajak");
+          setDateSimb();
+          setDateSitu();
+          setValue("kec", "");
+          setValue("alamatLengkap", "");
+          setValue("simb", "");
+          setValue("situ", "");
         }, 1500);
       }
     } catch (err) {
@@ -176,13 +192,13 @@ function ObjekPajaksAdd() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="mb-5">
                   <label className="label block mb-2" htmlFor="simb">
-                    Surat Ijin Mendirikan Bangunan
+                    No. Surat Ijin Mendirikan Bangunan
                   </label>
                   <input
                     id="simb"
                     type="text"
                     className="form-control"
-                    {...register("simb", { required: true })}
+                    {...register("simb")}
                   />
                   <small className="block my-2 invalid-feedback">
                     {errors.simb?.type === "required" &&
@@ -191,17 +207,73 @@ function ObjekPajaksAdd() {
                 </div>
 
                 <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="tgglSimb">
+                    Tanggal Surat Ijin Mendirikan Bangunan
+                  </label>
+                  <DatePicker
+                    locale="id"
+                    isClearable
+                    innerRef={{
+                      ...register("tgglSimb"),
+                    }}
+                    className={"form-control"}
+                    selected={dateSimb}
+                    onChange={(val) => {
+                      setDateSimb(val);
+                      setValue("tgglSimb", val);
+                    }}
+                    showMonthDropdown
+                    showYearDropdown
+                    withPortal
+                    portalId="root-portal"
+                  />
+                  <small className="block my-2 invalid-feedback">
+                    {errors.tgglSimb?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="mb-5">
                   <label className="label block mb-2" htmlFor="situ">
-                    Surat Ijin Tempat Usaha
+                    No. Surat Ijin Tempat Usaha
                   </label>
                   <input
                     id="situ"
                     type="text"
                     className="form-control"
-                    {...register("situ", { required: true })}
+                    {...register("situ")}
                   />
                   <small className="block my-2 invalid-feedback">
                     {errors.situ?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
+
+                <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="tgglSitu">
+                    Tanggal Surat Ijin Tempat Usaha
+                  </label>
+                  <DatePicker
+                    locale="id"
+                    isClearable
+                    innerRef={{
+                      ...register("tgglSitu"),
+                    }}
+                    className={"form-control"}
+                    selected={dateSitu}
+                    onChange={(val) => {
+                      setDateSitu(val);
+                      setValue("tgglSitu", val);
+                    }}
+                    showMonthDropdown
+                    showYearDropdown
+                    withPortal
+                    portalId="root-portal"
+                  />
+                  <small className="block my-2 invalid-feedback">
+                    {errors.tgglSitu?.type === "required" &&
                       "Field diatas tidak boleh kosong"}
                   </small>
                 </div>

@@ -6,6 +6,13 @@ import AppLayout from "../../../components/layouts/app/AppLayout";
 import { Store } from "../../../utils/Store";
 import dynamic from "next/dynamic";
 
+import DatePicker, { registerLocale } from "react-datepicker";
+import id from "date-fns/locale/id";
+registerLocale("id", id);
+import Moment from "react-moment";
+import "moment/locale/id";
+import moment from "moment";
+
 function ObjekPajaks({ params }) {
   const objekPajakId = params.id;
   const router = useRouter();
@@ -23,6 +30,9 @@ function ObjekPajaks({ params }) {
   const [wajibPajaks, setWajibPajaks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pesan, setPesan] = useState(false);
+
+  const [dateSimb, setDateSimb] = useState();
+  const [dateSitu, setDateSitu] = useState();
 
   useEffect(() => {
     if (!userInfo) {
@@ -61,6 +71,14 @@ function ObjekPajaks({ params }) {
             setValue("alamatLengkap", data.alamatLengkap);
             setValue("simb", data.simb);
             setValue("situ", data.situ);
+            if (data.tgglSimb) {
+              setValue("tgglSimb", new Date(data.tgglSimb));
+              setDateSimb(new Date(data.tgglSimb));
+            }
+            if (data.tgglSitu) {
+              setValue("tgglSitu", new Date(data.tgglSimb));
+              setDateSitu(new Date(data.tgglSitu));
+            }
           }
         } catch (err) {
           console.log(err);
@@ -77,7 +95,9 @@ function ObjekPajaks({ params }) {
     kec,
     alamatLengkap,
     simb,
+    tgglSimb,
     situ,
+    tgglSitu,
   }) => {
     try {
       setLoading(true);
@@ -89,7 +109,9 @@ function ObjekPajaks({ params }) {
           kec,
           alamatLengkap,
           simb,
+          tgglSimb,
           situ,
+          tgglSitu,
         },
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
@@ -106,6 +128,10 @@ function ObjekPajaks({ params }) {
           setValue("alamatLengkap", data.objekPajak.alamatLengkap);
           setValue("kec", data.objekPajak.kec);
           setValue("hpTel", data.objekPajak.hpTel);
+          setValue("tgglSimb", new Date(data.objekPajak.tgglSimb));
+          setDateSimb(new Date(data.objekPajak.tgglSimb));
+          setValue("tgglSitu", new Date(data.objekPajak.tgglSimb));
+          setDateSitu(new Date(data.objekPajak.tgglSitu));
         }, 1500);
       }
     } catch (err) {
@@ -207,7 +233,7 @@ function ObjekPajaks({ params }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="mb-5">
                   <label className="label block mb-2" htmlFor="simb">
-                    Surat Ijin Mendirikan Bangunan
+                    No. Surat Ijin Mendirikan Bangunan
                   </label>
                   <input
                     id="simb"
@@ -222,8 +248,37 @@ function ObjekPajaks({ params }) {
                 </div>
 
                 <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="tgglSimb">
+                    Tanggal Surat Ijin Mendirikan Bangunan
+                  </label>
+                  <DatePicker
+                    locale="id"
+                    isClearable
+                    innerRef={{
+                      ...register("tgglSimb", { required: true }),
+                    }}
+                    className={"form-control"}
+                    selected={dateSimb}
+                    onChange={(val) => {
+                      setDateSimb(val);
+                      setValue("tgglSimb", val);
+                    }}
+                    showMonthDropdown
+                    showYearDropdown
+                    withPortal
+                    portalId="root-portal"
+                  />
+                  <small className="block my-2 invalid-feedback">
+                    {errors.tgglSimb?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="mb-5">
                   <label className="label block mb-2" htmlFor="situ">
-                    Surat Ijin Tempat Usaha
+                    No. Surat Ijin Tempat Usaha
                   </label>
                   <input
                     id="situ"
@@ -236,7 +291,35 @@ function ObjekPajaks({ params }) {
                       "Field diatas tidak boleh kosong"}
                   </small>
                 </div>
+
+                <div className="mb-5">
+                  <label className="label block mb-2" htmlFor="tgglSitu">
+                    Tanggal Surat Ijin Tempat Usaha
+                  </label>
+                  <DatePicker
+                    locale="id"
+                    isClearable
+                    innerRef={{
+                      ...register("tgglSitu", { required: true }),
+                    }}
+                    className={"form-control"}
+                    selected={dateSitu}
+                    onChange={(val) => {
+                      setDateSitu(val);
+                      setValue("tgglSitu", val);
+                    }}
+                    showMonthDropdown
+                    showYearDropdown
+                    withPortal
+                    portalId="root-portal"
+                  />
+                  <small className="block my-2 invalid-feedback">
+                    {errors.tgglSitu?.type === "required" &&
+                      "Field diatas tidak boleh kosong"}
+                  </small>
+                </div>
               </div>
+
               <div className="flex items-center">
                 <button
                   className="btn btn_primary mt-5 ltr:mr-2 rtl:ml-2 uppercase"
