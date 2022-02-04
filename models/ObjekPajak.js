@@ -21,6 +21,11 @@ const objekPajakSchema = new mongoose.Schema(
     usia: { type: Number },
     sdhData: { type: Boolean, required: true, default: false },
     sdhProyeksi: { type: Boolean, required: true, default: false },
+    kumpFoto: [
+      {
+        image: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

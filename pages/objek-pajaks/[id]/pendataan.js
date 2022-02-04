@@ -18,6 +18,8 @@ import ReactMapGL, {
   GeolocateControl,
 } from "react-map-gl";
 import Moment from "react-moment";
+import ObjekPajakDropzone from "../../../components/dropzone/ObjekPajakDropzone";
+import Image from "next/image";
 
 function ObjekPajaks({ params }) {
   const objekPajakId = params.id;
@@ -105,7 +107,6 @@ function ObjekPajaks({ params }) {
             setValue("long", data.objekPajak.long);
             setValue("tipe", data.objekPajak.tipe);
             setValue("jumLan", data.objekPajak.jumLan);
-            console.log(data);
 
             setObjPajaks(data.objPajaks);
             if (data.latAkhir && data.longAkhir) {
@@ -125,7 +126,7 @@ function ObjekPajaks({ params }) {
     }
   }, [objekPajakId]);
 
-  console.log(objekPajak);
+  console.log(objekPajak.kumpFoto);
 
   const objekPajakHandler = async ({
     objekPajakId,
@@ -212,6 +213,17 @@ function ObjekPajaks({ params }) {
   const closePopupHandler = (e) => {
     setCurrentPlaceId(null);
   };
+
+  // const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
+  // const onDrop = useCallback((acceptedFiles, rejectFiles) => {
+  //   console.log("acceptedFiles", acceptedFiles);
+  //   console.log("rejectFiles", rejectFiles);
+  // });
+
+  // const onDrop = useCallback((acceptedFiles) => {
+  //   console.log("acceptedFiles", acceptedFiles);
+  // }, []);
 
   return (
     <AppLayout title="Objek Pajak">
@@ -359,14 +371,14 @@ function ObjekPajaks({ params }) {
                                     {wp.sdhData && (
                                       <div className="badge badge_outlined badge_success uppercase">
                                         Pendataan{"  "}
-                                        <i class="las las-check"></i>
+                                        <i className="las las-check"></i>
                                       </div>
                                     )}
 
                                     {wp.sdhProyeksi ? (
                                       <div className="ml-2 badge badge_outlined badge_success uppercase">
                                         Proyeksi{"  "}
-                                        <i class="las las-check"></i>
+                                        <i className="las las-check"></i>
                                       </div>
                                     ) : (
                                       <div className="ml-2 badge badge_outlined badge_secondary uppercase">
@@ -403,6 +415,7 @@ function ObjekPajaks({ params }) {
               </div>
             </div>
           </div>
+          <div className="card p-5 mt-5"></div>
         </div>
 
         <div className="lg:w-1/2 xl:w-1/3 lg:px-4 pt-5 lg:pt-0">
@@ -653,6 +666,25 @@ function ObjekPajaks({ params }) {
                 )}
               </div>
             </form>
+          </div>
+
+          <div className="card p-5 mt-5">
+            <div className="tabs">
+              <nav className="tab-nav">
+                <button className="nav-link h5 uppercase active">
+                  Foto Bangunan
+                </button>
+              </nav>
+            </div>
+            <ObjekPajakDropzone id={objekPajakId} />
+            {/* <div className="dropzone mt-5" {...getRootProps()}>
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <h3>Drag Active</h3>
+              ) : (
+                <h3>Geser dan lepaskan gambar disini</h3>
+              )}
+            </div> */}
           </div>
         </div>
       </div>

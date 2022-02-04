@@ -120,6 +120,7 @@ function Users({ params }) {
     const file = e.target.files[0];
     const bodyFormData = new FormData();
     bodyFormData.append("file", file);
+    console.log(file);
 
     try {
       setLoadingImage(true);
