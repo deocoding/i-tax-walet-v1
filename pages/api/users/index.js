@@ -9,23 +9,11 @@ handler.use(isAuth);
 
 handler.get(async (req, res) => {
   await db.connect();
-
-  let users;
-
-  if (req.query.cari) {
-    users = await User.find({
-      $text: { $search: req.query.cari },
-      role: { $ne: 1 },
-    });
-    await db.disconnect();
-    res.send(users);
-  } else {
-    users = await User.find({
-      role: { $ne: 1 },
-    });
-    await db.disconnect();
-    res.send(users);
-  }
+  const users = await User.find({
+    role: { $ne: 1 },
+  });
+  await db.disconnect();
+  res.send(users);
 });
 
 handler.post(async (req, res) => {

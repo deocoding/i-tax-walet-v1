@@ -8,23 +8,11 @@ handler.use(isAuth);
 
 handler.get(async (req, res) => {
   await db.connect();
-
-  let wajibPajaks;
-
-  if (req.query.cari) {
-    wajibPajaks = await WajibPajak.find({
-      $text: { $search: req.query.cari },
-      role: { $ne: 1 },
-    });
-    await db.disconnect();
-    res.send(wajibPajaks);
-  } else {
-    wajibPajaks = await WajibPajak.find({
-      role: { $ne: 1 },
-    });
-    await db.disconnect();
-    res.send(wajibPajaks);
-  }
+  const wajibPajaks = await WajibPajak.find({
+    role: { $ne: 1 },
+  });
+  await db.disconnect();
+  res.send(wajibPajaks);
 });
 
 handler.post(async (req, res) => {

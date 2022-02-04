@@ -9,52 +9,26 @@ handler.use(isAuth);
 handler.get(async (req, res) => {
   await db.connect();
 
-  let objekPajaks;
-
-  if (req.query.cari) {
-    objekPajaks = await ObjekPajak.aggregate([
-      { $match: { $text: { $search: req.query.cari } } },
-      {
-        $lookup: {
-          from: "wajibpajaks",
-          localField: "wajibPajak", // field in the orders collection
-          foreignField: "_id", // field in the items collection
-          as: "fromWajibPajak",
+  const objekPajaks = await ObjekPajak.aggregate([
+    {
+      $lookup: {
+        from: "wajibpajaks",
+        localField: "wajibPajak", // field in the orders collection
+        foreignField: "_id", // field in the items collection
+        as: "fromWajibPajak",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
         },
       },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
-          },
-        },
-      },
-      { $project: { fromWajibPajak: 0 } },
-    ]);
-    await db.disconnect();
-    res.send(objekPajaks);
-  } else {
-    objekPajaks = await ObjekPajak.aggregate([
-      {
-        $lookup: {
-          from: "wajibpajaks",
-          localField: "wajibPajak", // field in the orders collection
-          foreignField: "_id", // field in the items collection
-          as: "fromWajibPajak",
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
-          },
-        },
-      },
-      { $project: { fromWajibPajak: 0 } },
-    ]);
-    await db.disconnect();
-    res.send(objekPajaks);
-  }
+    },
+    { $project: { fromWajibPajak: 0 } },
+  ]);
+  await db.disconnect();
+  res.send(objekPajaks);
 });
 
 handler.post(async (req, res) => {

@@ -3,9 +3,15 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext } from "react";
-import { useTable, usePagination, useRowSelect } from "react-table";
+import {
+  useTable,
+  usePagination,
+  useRowSelect,
+  useGlobalFilter,
+} from "react-table";
 import { getError } from "../../utils/error";
 import { Store } from "../../utils/Store";
+import { GlobalFilter } from "./GlobalFilter";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
@@ -57,12 +63,14 @@ function Table({
     setPageSize,
     selectedFlatRows,
     state: { pageIndex, pageSize, selectedRowIds },
+    setGlobalFilter,
   } = useTable(
     {
       columns,
       data,
       initialState: { pageSize: 5 },
     },
+    useGlobalFilter,
     usePagination,
     useRowSelect,
     (hooks) => {
@@ -110,9 +118,62 @@ function Table({
     }
   };
 
+  const { globalFilter } = state;
+
   // Render the UI for your table
   return (
     <>
+      <section className="breadcrumb lg:flex items-start">
+        <div>
+          <h1>User</h1>
+          <ul>
+            <li>
+              <a href="#">
+                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+              </a>
+            </li>
+            <li className="divider las las-arrow-right"></li>
+            <li>Daftar User</li>
+          </ul>
+        </div>
+
+        <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
+          {/* <!-- Layout --> */}
+          <div className="flex mt-5 lg:mt-0">
+            <a
+              href="#"
+              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
+            >
+              <span className="las las-bars"></span>
+            </a>
+            <a
+              href="blog-list-card-rows.html"
+              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+            >
+              <span className="las las-list"></span>
+            </a>
+            <a
+              href="blog-list-card-columns.html"
+              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+            >
+              <span className="las las-th-large"></span>
+            </a>
+          </div>
+
+          {/* <!-- Search --> */}
+          <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
+
+          <div className="flex mt-5 lg:mt-0">
+            {/* <!-- Add New --> */}
+            <Link href="/users/add" passHref>
+              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
+                Tambah Baru
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <div className="card p-5">
         <div className="overflow-x-auto">
           <table
