@@ -33,7 +33,6 @@ function ObjekPajaks() {
     }
   }, [cari, userInfo]);
 
-  console.log(objekPajaks);
   return (
     <AppLayout title="Objek Pajak">
       {/* <!-- Breadcrumb --> */}

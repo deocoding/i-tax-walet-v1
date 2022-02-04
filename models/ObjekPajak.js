@@ -19,6 +19,8 @@ const objekPajakSchema = new mongoose.Schema(
     tipe: { type: String },
     jumLan: { type: Number },
     usia: { type: Number },
+    sdhData: { type: Boolean, required: true, default: false },
+    sdhProyeksi: { type: Boolean, required: true, default: false },
   },
   {
     timestamps: true,

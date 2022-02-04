@@ -399,14 +399,26 @@ function WajibPajaksTable({ data }) {
         Cell: ({ row }) => (
           <div className="inline-flex ltr:ml-auto rtl:mr-auto justify-center items-center">
             <Link href={`/objek-pajaks/survey/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_info ml-3">
-                <span className="las las-chart-line"></span>
-              </a>
+              {row.original.sdhProyeksi ? (
+                <a className="btn btn-icon btn_success ml-3">
+                  <span className="las las-chart-line"></span>
+                </a>
+              ) : (
+                <a className="btn btn-icon btn_outlined btn_secondary ml-3">
+                  <span className="las las-chart-line"></span>
+                </a>
+              )}
             </Link>
-            <Link href={`/objek-pajaks/pendataan/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_info ml-3">
-                <span className="las las-map-marked-alt"></span>
-              </a>
+            <Link href={`/objek-pajaks/${row.original._id}/pendataan`} passHref>
+              {row.original.sdhData ? (
+                <a className="btn btn-icon btn_success ml-3">
+                  <span className="las las-map-marked-alt"></span>
+                </a>
+              ) : (
+                <a className="btn btn-icon btn_outlined btn_secondary ml-3">
+                  <span className="las las-map-marked-alt"></span>
+                </a>
+              )}
             </Link>
             <Link href={`/objek-pajaks/${row.original._id}`} passHref>
               <a className="btn btn-icon btn_outlined btn_secondary ml-3">
