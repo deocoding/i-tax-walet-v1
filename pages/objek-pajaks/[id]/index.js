@@ -10,7 +10,6 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import id from "date-fns/locale/id";
 registerLocale("id", id);
 import Moment from "react-moment";
-import "moment/locale/id";
 import moment from "moment";
 
 function ObjekPajaks({ params }) {

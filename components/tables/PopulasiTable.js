@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext } from "react";
+import Moment from "react-moment";
 import {
   useTable,
   usePagination,
@@ -103,13 +104,13 @@ function Table({
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
 
-  const deleteAllHandler = async (objekPajaksIds) => {
+  const deleteAllHandler = async (proyPopulIds) => {
     if (!window.confirm("Yakin dihapus?")) {
       return;
     }
     try {
       const { data } = await axios.delete(
-        `/api/objek-pajaks?ids=${objekPajaksIds}`,
+        `/api/objek-pajaks/survey?ids=${proyPopulIds}`,
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
@@ -127,53 +128,9 @@ function Table({
   return (
     <>
       <section className="breadcrumb lg:flex items-start">
-        <div>
-          <h1>Objek Pajak</h1>
-          <ul>
-            <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
-              </a>
-            </li>
-            <li className="divider las las-arrow-right"></li>
-            <li>Daftar Objek Pajak</li>
-          </ul>
-        </div>
-
         <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
           {/* <!-- Search --> */}
           <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-
-          <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Add New --> */}
-            <Link href="/objek-pajaks/add" passHref>
-              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-                Tambah Baru
-              </button>
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -373,61 +330,42 @@ function WajibPajaksTable({ data }) {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Nama Pemilik",
-        accessor: "namaPemilik",
-        className: "w-1/5 ltr:text-left rtl:text-right uppercase",
+        Header: "Tahun",
+        accessor: "year",
+        className: "ltr:text-left rtl:text-right uppercase",
+        // Cell: ({ row }) => (
+        //   <Moment format="lll">{row.original._id.year}</Moment>
+        // ),
       },
       {
-        Header: "NPWPD",
-        accessor: "npwpd",
+        Header: "Bulan",
+        accessor: "month",
         className: "text-left uppercase",
       },
       {
-        Header: "Alamat Lengkap",
-        accessor: "alamatLengkap",
+        Header: "Tanggal",
+        accessor: "day",
         className: "text-left uppercase",
       },
       {
-        Header: "Kecamatan",
-        accessor: "kec",
+        Header: "Populasi",
+        accessor: "total_populasi",
         className: "text-left uppercase",
       },
-      {
-        Header: () => null,
-        id: "aksi",
-        classNameCell: "ltr:text-right rtl:text-left",
-        Cell: ({ row }) => (
-          <div className="inline-flex ltr:ml-auto rtl:mr-auto justify-center items-center">
-            <Link href={`/objek-pajaks/${row.original._id}/survey`} passHref>
-              {row.original.sdhProyeksi ? (
-                <a className="btn btn-icon btn_success ml-3">
-                  <span className="las las-feather-alt"></span>
-                </a>
-              ) : (
-                <a className="btn btn-icon btn_outlined btn_secondary ml-3">
-                  <span className="las las-feather-alt"></span>
-                </a>
-              )}
-            </Link>
-            <Link href={`/objek-pajaks/${row.original._id}/pendataan`} passHref>
-              {row.original.sdhData ? (
-                <a className="btn btn-icon btn_success ml-3">
-                  <span className="las las-map-marked-alt"></span>
-                </a>
-              ) : (
-                <a className="btn btn-icon btn_outlined btn_secondary ml-3">
-                  <span className="las las-map-marked-alt"></span>
-                </a>
-              )}
-            </Link>
-            <Link href={`/objek-pajaks/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_outlined btn_secondary ml-3">
-                <span className="las las-pen-fancy"></span>
-              </a>
-            </Link>
-          </div>
-        ),
-      },
+      // {
+      //   Header: () => null,
+      //   id: "aksi",
+      //   classNameCell: "ltr:text-right rtl:text-left",
+      //   Cell: ({ row }) => (
+      //     <div className="inline-flex ltr:ml-auto rtl:mr-auto justify-center items-center">
+      //       <Link href={`/objek-pajaks/${row.original._id}`} passHref>
+      //         <a className="btn btn-icon btn_outlined btn_secondary ml-3">
+      //           <span className="las las-pen-fancy"></span>
+      //         </a>
+      //       </Link>
+      //     </div>
+      //   ),
+      // },
     ],
     []
   );

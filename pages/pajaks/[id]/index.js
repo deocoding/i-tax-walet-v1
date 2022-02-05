@@ -69,8 +69,8 @@ function Pajaks({ params }) {
           if (data) {
             setValue("pajakId", pajakId);
             setValue("wajibPajak", data.wajibPajak);
-            setValue("tgglJual", data.tgglJual);
-            setValue("tgglBayar", data.tgglBayar);
+            setValue("tgglJual", new Date(data.tgglJual));
+            setValue("tgglBayar", new Date(data.tgglBayar));
             setValue("volTon", data.volTon);
             setValue("nilJual", data.nilJual);
             setValue("totJual", data.totJual);

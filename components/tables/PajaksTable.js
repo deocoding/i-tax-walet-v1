@@ -14,6 +14,7 @@ import {
 import { getError } from "../../utils/error";
 import { Store } from "../../utils/Store";
 import { GlobalFilter } from "./GlobalFilter";
+import "moment/locale/id";
 
 const IndeterminateCheckbox = React.forwardRef(
   ({ indeterminate, ...rest }, ref) => {
