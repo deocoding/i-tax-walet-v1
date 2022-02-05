@@ -6,7 +6,9 @@ import "tippy.js/animations/shift-toward-extreme.css";
 import "tippy.js/animations/scale.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "react-datepicker/dist/react-datepicker.css";
-import "pure-react-carousel/dist/react-carousel.es.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "react-medium-image-zoom/dist/styles.css";
 
 import { ThemeProvider } from "next-themes";
 import { StoreProvider } from "../utils/Store";

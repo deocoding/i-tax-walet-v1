@@ -2740,3 +2740,16 @@ button:focus {
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
+.slick-prev {
+  left: -30px !important;
+}
+.slick-next {
+  right: -30px !important;
+}
+.slick-prev:before,
+.slick-next:before {
+  color: rgb(104, 104, 104) !important;
+}
+.slick-list {
+  margin-bottom: 15px !important;
+}

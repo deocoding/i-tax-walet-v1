@@ -17,9 +17,11 @@ import ReactMapGL, {
   FullscreenControl,
   GeolocateControl,
 } from "react-map-gl";
+
 import Moment from "react-moment";
 import ObjekPajakDropzone from "../../../components/dropzone/ObjekPajakDropzone";
 import Image from "next/image";
+import OpSlider from "../../../components/slider/OpSlider";
 
 function ObjekPajaks({ params }) {
   const objekPajakId = params.id;
@@ -126,7 +128,7 @@ function ObjekPajaks({ params }) {
     }
   }, [objekPajakId]);
 
-  console.log(objekPajak.kumpFoto);
+  // console.log(objekPajak.kumpFoto);
 
   const objekPajakHandler = async ({
     objekPajakId,
@@ -415,10 +417,14 @@ function ObjekPajaks({ params }) {
               </div>
             </div>
           </div>
-          <div className="card p-5 mt-5"></div>
+          {objekPajak.kumpFoto && objekPajak.kumpFoto.length > 0 && (
+            <div className="card p-5 mt-5">
+              <OpSlider data={objekPajak.kumpFoto} />
+            </div>
+          )}
         </div>
 
-        <div className="lg:w-1/2 xl:w-1/3 lg:px-4 pt-5 lg:pt-0">
+        <div className="lg:w-1/2 xl:w-1/3 lg:px-4 lg:pt-0">
           <div className="card p-5 mt-5">
             <nav className="tab-nav mb-5">
               <button className="nav-link h5 uppercase active">
@@ -672,19 +678,11 @@ function ObjekPajaks({ params }) {
             <div className="tabs">
               <nav className="tab-nav">
                 <button className="nav-link h5 uppercase active">
-                  Foto Bangunan
+                  Upload Foto Bangunan
                 </button>
               </nav>
             </div>
             <ObjekPajakDropzone id={objekPajakId} />
-            {/* <div className="dropzone mt-5" {...getRootProps()}>
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <h3>Drag Active</h3>
-              ) : (
-                <h3>Geser dan lepaskan gambar disini</h3>
-              )}
-            </div> */}
           </div>
         </div>
       </div>

@@ -24,7 +24,6 @@
     "next-connect": "^0.11.0",
     "next-themes": "^0.0.15",
     "nprogress": "^0.2.0",
-    "pure-react-carousel": "^1.28.0",
     "react": "17.0.2",
     "react-chartjs-2": "^4.0.1",
     "react-datepicker": "^4.6.0",
@@ -32,9 +31,12 @@
     "react-dropzone": "^11.5.3",
     "react-hook-form": "^7.25.0",
     "react-map-gl": "^6.1.18",
+    "react-medium-image-zoom": "^4.3.5",
     "react-moment": "^1.1.1",
     "react-number-format": "^4.9.1",
+    "react-slick": "^0.28.1",
     "react-table": "^7.7.0",
+    "slick-carousel": "^1.8.1",
     "streamifier": "^0.1.1"
   },
   "devDependencies": {

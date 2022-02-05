@@ -17,7 +17,7 @@ cloudinary.config({
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "5mb", // Set desired value here
+      sizeLimit: "50mb", // Set desired value here
     },
   },
 };
@@ -51,7 +51,7 @@ handler.post(async (req, res) => {
     promises.push(
       cloudinary.uploader.upload(image, {
         folder: "i-tax-walet",
-        width: 800,
+        width: 840,
         crop: "scale",
       })
     );
@@ -62,11 +62,11 @@ handler.post(async (req, res) => {
     mongoose.Types.ObjectId(req.body.objekPajakId)
   );
   response.forEach(async (espon) => {
-    objekPajak.kumpFoto.push({ image: espon.public_id });
+    await objekPajak.kumpFoto.push({ image: espon.public_id });
   });
   const berhasil = await objekPajak.save();
   await db.disconnect();
-  res.send(response);
+  res.send(berhasil);
 
   //   const response = await cloudinary.uploader.upload(req.file, {
   //     folder: "i-tax-walet",

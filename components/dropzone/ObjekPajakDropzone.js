@@ -54,14 +54,16 @@ function ObjekPajakDropzone(id) {
           },
         }
       );
-      if (data) {
+      if ({ data }) {
         setPesan(true);
         setLoading(false);
+
+        // alert(data);
         setTimeout(async () => {
           setPesan(false);
           setImages([]);
+          router.reload();
         }, 1500);
-        console.log(data);
       }
     } catch (err) {
       setLoading(false);
