@@ -31,20 +31,14 @@ export const options = {
   },
 };
 
-export function ProyeksiChart({bulans, burungs, sarangs}) {
+export function ProyeksiChart({bulans, pendapatans}) {
   const labels = bulans;
   const data = {
     labels,
     datasets: [
       {
-        label: 'Burung',
-        data: burungs ,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
-      {
-        label: 'Sarang',
-        data: sarangs,
+        label: 'Total Pendapatan',
+        data: pendapatans.reverse(),
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },

@@ -56,17 +56,30 @@ handler.get(async (req, res) => {
     },
     { $project: { fromWajibPajak: 0 } },
     {
-      $sort: { tgglBayar: -1 },
+      $group: {
+        _id: {
+          tahun: {
+            $year: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
+          },
+          bulan: {
+            $month: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
+          },
+        },
+        // total_penjualan: { $sum: "$totJual" },
+        // total_pajak: { $sum: "$totPajak" },
+        total_bayar: { $sum: "$jumBayar" },
+        count: { $sum: 1 },
+      },
     },
+    {
+      $sort: { _id: -1, tgglBayar: 1 },
+    },
+    // ===================== GRUP USER =======================
+    //
     // {
     //   $group: {
     //     _id: {
-    //       year_document: {
-    //         $year: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
-    //       },
-    //       month_document: {
-    //         $month: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
-    //       },
+    //       id: "$wajibPajak",
     //       nama_pemilik: "$namaPemilik",
     //       npwpd: "$npwpd",
     //     },
@@ -76,6 +89,7 @@ handler.get(async (req, res) => {
     //     count: { $sum: 1 },
     //   },
     // },
+    // ==========================================================
     // { $match: { $expr: { $eq: ["$_id.nama_pemilik", "Joni Esmod"] } } },
     // {
     //   $addFields: {
@@ -174,10 +188,45 @@ handler.get(async (req, res) => {
           x_awal--;
         }
       }
+
+      object.xy = object.total_bayar * object.x;
+      object.x2 = object.x * object.x;
     });
 
-    // console.log(prediksis);
-    res.send(prediksis);
+    const totalY = prediksis.reduce(function (sum, current) {
+      return sum + current.total_bayar;
+    }, 0);
+    const totalYx = prediksis.reduce(function (sum, current) {
+      return sum + current.xy;
+    }, 0);
+    const totalX2 = prediksis.reduce(function (sum, current) {
+      return sum + current.x2;
+    }, 0);
+    const totalBaris = prediksis.length;
+    const penambahX = totalBaris - 1;
+
+    const a = totalY / totalBaris;
+    const b = (totalYx / totalX2) * penambahX;
+    const prediksiRupiah = a + b;
+    const yAkhir = prediksis[0].total_bayar;
+    const prediksiPersen = ((prediksiRupiah / yAkhir) * 100) / 100;
+    const prediksiBulat = prediksiPersen.toFixed(2);
+
+    const bulans = prediksis.map(function (c) {
+      c = c._id.bulan;
+      return c;
+    });
+    const pendapatans = prediksis.map(function (d) {
+      d = d.total_bayar;
+      return d;
+    });
+
+    await bulans.reverse();
+
+    console.log(
+      bulans + " " + yAkhir + " " + prediksiPersen.toFixed(2) + " " + totalBaris
+    );
+    res.send({ prediksis, prediksiRupiah, prediksiBulat, bulans, pendapatans });
   } else {
     res.status(404).send({ pesan: "Pajak not found" });
   }

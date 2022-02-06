@@ -13,7 +13,7 @@ const pajakSchema = new mongoose.Schema(
     totJual: { type: Number, required: true },
     totPajak: { type: Number, required: true },
     jumBayar: { type: Number },
-    tgglBayar: { type: Date },
+    tgglBayar: { type: Date, index: true },
     sttsPajak: { type: String },
   },
   {
@@ -22,7 +22,7 @@ const pajakSchema = new mongoose.Schema(
 );
 
 pajakSchema.index({
-  wajibPajak: "text",
+  tgglBayar: "text",
 });
 
 const Pajak = mongoose.models.Pajak || mongoose.model("Pajak", pajakSchema);
