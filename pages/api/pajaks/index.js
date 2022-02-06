@@ -13,8 +13,8 @@ handler.get(async (req, res) => {
     {
       $lookup: {
         from: "wajibpajaks",
-        localField: "wajibPajak", // field in the orders collection
-        foreignField: "_id", // field in the items collection
+        localField: "wajibPajak",
+        foreignField: "_id",
         as: "fromWajibPajak",
       },
     },

@@ -13,7 +13,6 @@ function Pajaks() {
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
   const [pajaks, setPajaks] = useState([]);
-  const [cari, setCari] = useState("");
 
   useEffect(() => {
     if (!userInfo) {
@@ -32,7 +31,7 @@ function Pajaks() {
 
       fetchPajaks();
     }
-  }, [cari, userInfo]);
+  }, [userInfo]);
 
   return (
     <AppLayout title="Pajak">
