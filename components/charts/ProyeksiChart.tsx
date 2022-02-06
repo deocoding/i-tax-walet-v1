@@ -38,7 +38,7 @@ export function ProyeksiChart({bulans, pendapatans}) {
     datasets: [
       {
         label: 'Total Pendapatan',
-        data: pendapatans.reverse(),
+        data: pendapatans,
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },

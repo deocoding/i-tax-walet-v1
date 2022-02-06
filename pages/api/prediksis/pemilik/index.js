@@ -9,36 +9,7 @@ handler.use(isAuth);
 handler.get(async (req, res) => {
   await db.connect();
 
-  //   const prediksis = await Pajak.aggregate([
-  //     {
-  //       $lookup: {
-  //         from: "wajibpajaks",
-  //         localField: "wajibPajak",
-  //         foreignField: "_id",
-  //         as: "fromWajibPajak",
-  //       },
-  //     },
-  //     {
-  //       $replaceRoot: {
-  //         newRoot: {
-  //           $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
-  //         },
-  //       },
-  //     },
-  //     { $project: { fromWajibPajak: 0 } },
-  //     {
-  //       $group: {
-  //         _id: { nama_pemilik: "$namaPemilik", npwpd: "$npwpd" },
-  //         total_penjualan: { $sum: "$totJual" },
-  //         total_pajak: { $sum: "$totPajak" },
-  //         total_bayar: { $sum: "$jumBayar" },
-  //         count: { $sum: 1 },
-  //       },
-  //     },
-  //     { $match: { $expr: { $gte: ["$count", 5] } } },
-  //   ]);
-
-  const prediksis = await Pajak.aggregate([
+  const prediksiPemiliks = await Pajak.aggregate([
     {
       $lookup: {
         from: "wajibpajaks",
@@ -58,56 +29,89 @@ handler.get(async (req, res) => {
     {
       $group: {
         _id: {
-          tahun: {
-            $year: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
-          },
-          bulan: {
-            $month: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
-          },
+          nama_pemilik: "$namaPemilik",
+          npwpd: "$npwpd",
+          id: "$wajibPajak",
         },
-        // total_penjualan: { $sum: "$totJual" },
-        // total_pajak: { $sum: "$totPajak" },
+        total_penjualan: { $sum: "$totJual" },
+        total_pajak: { $sum: "$totPajak" },
         total_bayar: { $sum: "$jumBayar" },
         count: { $sum: 1 },
       },
     },
-    {
-      $sort: { _id: -1, tgglBayar: 1 },
-    },
-    // ===================== GRUP USER =======================
-    //
-    // {
-    //   $group: {
-    //     _id: {
-    //       id: "$wajibPajak",
-    //       nama_pemilik: "$namaPemilik",
-    //       npwpd: "$npwpd",
-    //     },
-    //     total_penjualan: { $sum: "$totJual" },
-    //     total_pajak: { $sum: "$totPajak" },
-    //     total_bayar: { $sum: "$jumBayar" },
-    //     count: { $sum: 1 },
-    //   },
-    // },
-    // ==========================================================
-    { $match: { $expr: { $eq: ["$_id.tahun", new Date().getFullYear()] } } },
-    // {
-    //   $addFields: {
-    //     angkaX: {
-    //       $function: {
-    //         body: function (_id) {
-    //           let total = Array.sum(_id);
-    //           return total;
-    //         },
-    //         args: ["$_id"],
-    //         lang: "js",
-    //       },
-    //     },
-    //   },
-    // },
+    // { $match: { $expr: { $gte: ["$count", 5] } } },
   ]);
 
-  if (prediksis) {
+  // const prediksis = await Pajak.aggregate([
+  //   {
+  //     $lookup: {
+  //       from: "wajibpajaks",
+  //       localField: "wajibPajak",
+  //       foreignField: "_id",
+  //       as: "fromWajibPajak",
+  //     },
+  //   },
+  //   {
+  //     $replaceRoot: {
+  //       newRoot: {
+  //         $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
+  //       },
+  //     },
+  //   },
+  //   { $project: { fromWajibPajak: 0 } },
+  //   {
+  //     $group: {
+  //       _id: {
+  //         tahun: {
+  //           $year: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
+  //         },
+  //         bulan: {
+  //           $month: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
+  //         },
+  //       },
+  //       // total_penjualan: { $sum: "$totJual" },
+  //       // total_pajak: { $sum: "$totPajak" },
+  //       total_bayar: { $sum: "$jumBayar" },
+  //       count: { $sum: 1 },
+  //     },
+  //   },
+  //   {
+  //     $sort: { _id: -1, tgglBayar: 1 },
+  //   },
+  //   // ===================== GRUP USER =======================
+  //   //
+  //   // {
+  //   //   $group: {
+  //   //     _id: {
+  //   //       id: "$wajibPajak",
+  //   //       nama_pemilik: "$namaPemilik",
+  //   //       npwpd: "$npwpd",
+  //   //     },
+  //   //     total_penjualan: { $sum: "$totJual" },
+  //   //     total_pajak: { $sum: "$totPajak" },
+  //   //     total_bayar: { $sum: "$jumBayar" },
+  //   //     count: { $sum: 1 },
+  //   //   },
+  //   // },
+  //   // ==========================================================
+  //   // { $match: { $expr: { $eq: ["$_id.nama_pemilik", "Joni Esmod"] } } },
+  //   // {
+  //   //   $addFields: {
+  //   //     angkaX: {
+  //   //       $function: {
+  //   //         body: function (_id) {
+  //   //           let total = Array.sum(_id);
+  //   //           return total;
+  //   //         },
+  //   //         args: ["$_id"],
+  //   //         lang: "js",
+  //   //       },
+  //   //     },
+  //   //   },
+  //   // },
+  // ]);
+
+  if (prediksiPemiliks) {
     // const count = prediksis.length;
     // const countOdd = count % 2 == 1 && true;
     // let x_awal = Math.floor(count / 2);
@@ -165,8 +169,8 @@ handler.get(async (req, res) => {
     //   return container;
     // });
 
-    await prediksis.forEach((object, index) => {
-      const count = prediksis.length;
+    await prediksiPemiliks.forEach((object, index) => {
+      const count = prediksiPemiliks.length;
       const countOdd = count % 2 == 1 && true;
       let x_awal = Math.floor(count / 2);
       if (countOdd) {
@@ -193,42 +197,40 @@ handler.get(async (req, res) => {
       object.x2 = object.x * object.x;
     });
 
-    const totalY = prediksis.reduce(function (sum, current) {
+    const totalY = prediksiPemiliks.reduce(function (sum, current) {
       return sum + current.total_bayar;
     }, 0);
-    const totalYx = prediksis.reduce(function (sum, current) {
+    const totalYx = prediksiPemiliks.reduce(function (sum, current) {
       return sum + current.xy;
     }, 0);
-    const totalX2 = prediksis.reduce(function (sum, current) {
+    const totalX2 = prediksiPemiliks.reduce(function (sum, current) {
       return sum + current.x2;
     }, 0);
-    const totalBaris = prediksis.length;
+    const totalBaris = prediksiPemiliks.length;
     const penambahX = totalBaris - 1;
 
     const a = totalY / totalBaris;
     const b = (totalYx / totalX2) * penambahX;
-    const prediksiRupiah = Math.floor(a + b);
-    const yAkhir = prediksis[0].total_bayar;
+    const prediksiRupiah = a + b;
+    const yAkhir = prediksiPemiliks[0].total_bayar;
     const prediksiPersen = ((prediksiRupiah / yAkhir) * 100) / 100;
     const prediksiBulat = prediksiPersen.toFixed(2);
 
-    const bulans = prediksis.map(function (c) {
+    const bulans = prediksiPemiliks.map(function (c) {
       c = c._id.bulan;
       return c;
     });
-    const pendapatans = prediksis.map(function (d) {
+    const pendapatans = prediksiPemiliks.map(function (d) {
       d = d.total_bayar;
       return d;
     });
 
     await bulans.reverse();
-    await pendapatans.reverse();
-    await prediksiPersen.toFixed(2);
 
     console.log(
-      bulans + " " + yAkhir + " " + prediksiPersen + " " + totalBaris
+      bulans + " " + yAkhir + " " + prediksiPersen.toFixed(2) + " " + totalBaris
     );
-    res.send({ prediksis, prediksiRupiah, prediksiBulat, bulans, pendapatans });
+    res.send({ prediksiPemiliks });
   } else {
     res.status(404).send({ pesan: "Pajak not found" });
   }

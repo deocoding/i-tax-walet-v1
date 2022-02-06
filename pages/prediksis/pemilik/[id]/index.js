@@ -4,20 +4,23 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import NumberFormat from "react-number-format";
-import { ProyeksiChart } from "../../components/charts/ProyeksiChart.tsx";
-import AppLayout from "../../components/layouts/app/AppLayout";
-import PrediksisTable from "../../components/tables/PrediksisTable";
-import { Store } from "../../utils/Store";
+import { ProyeksiChart } from "../../../../components/charts/ProyeksiChart.tsx";
+import AppLayout from "../../../../components/layouts/app/AppLayout";
+import PrediksisTable from "../../../../components/tables/PrediksisTable";
+import { Store } from "../../../../utils/Store";
 
-function Prediksis() {
+function Prediksis({ params }) {
+  const wajibPajakId = params.id;
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
-  const [prediksiPelaporan, setPrediksiPelaporan] = useState([]);
+  const [prediksisPemilik, setPrediksisPemilik] = useState([]);
   const [prediksiRupiah, setPrediksiRupiah] = useState("");
   const [prediksiPersen, setPrediksiPersen] = useState("");
   const [bulans, setBulans] = useState([]);
   const [pendapatans, setPendapatans] = useState([]);
+
+  const [wajibPajak, setWajibPajak] = useState([]);
 
   useEffect(() => {
     if (!userInfo) {
@@ -25,10 +28,14 @@ function Prediksis() {
     } else {
       const fetchPrediksis = async () => {
         try {
-          const res = await axios.get(`/api/prediksis/pelaporan`, {
-            headers: { authorization: `Bearer ${userInfo.token}` },
-          });
-          setPrediksiPelaporan(res.data.prediksis);
+          const res = await axios.get(
+            `/api/prediksis/pemilik/${wajibPajakId}`,
+            {
+              headers: { authorization: `Bearer ${userInfo.token}` },
+            }
+          );
+          setWajibPajak(res.data.wajibPajak);
+          setPrediksisPemilik(res.data.prediksisPemilik);
           setPrediksiRupiah(res.data.prediksiRupiah);
           setPrediksiPersen(res.data.prediksiBulat);
           setBulans(res.data.bulans);
@@ -42,7 +49,7 @@ function Prediksis() {
     fetchPrediksis();
   }, [userInfo]);
 
-  // console.log(res);
+  // console.log(prediksisPemilik);
 
   return (
     <AppLayout title="Prediksi">
@@ -56,9 +63,9 @@ function Prediksis() {
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>
-            <li>Prediksi Potensi Pajak</li>
+            <li>Prediksi Potensi Pajak Pemilik</li>
             <li className="divider las las-arrow-right"></li>
-            <li>Bulan Berikutnya</li>
+            <li>Pembayaran Berikutnya</li>
           </ul>
         </div>
       </section>
@@ -66,14 +73,14 @@ function Prediksis() {
       {/* <!-- Layout --> */}
       <div className="flex mt-0">
         <Link href="/prediksis">
-          <a className="btn btn-icon btn-icon_large btn_primary">
+          <a className="btn btn-icon btn-icon_large btn_outlined btn_primary">
             <span className="las las-globe-asia"></span>
           </a>
         </Link>
         <Link href="/prediksis/pemilik">
           <a
             href="blog-list-card-rows.html"
-            className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+            className="btn btn-icon btn-icon_large btn_secondary ltr:ml-2 rtl:mr-2"
           >
             <span className="las las-money-check"></span>
           </a>
@@ -88,6 +95,35 @@ function Prediksis() {
         </Link>
       </div>
 
+      <div className="lg:flex lg:-mx-4 mt-5">
+        <div className="w-full lg:px-4">
+          <div className="card lg:flex">
+            <div
+              className="flex items-center 
+            p-5 border-t lg:border-t-0 border-gray-200 dark:border-gray-900"
+            >
+              <span className="ltr:mr-2 rtl:ml-2">id :</span>
+              <span className="ltr:ml-auto rtl:mr-auto font-semibold">
+                {wajibPajakId}
+              </span>
+            </div>
+            <div className="flex items-center p-5 border-t lg:border-t-0 lg:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
+              <span className="ltr:mr-2 rtl:ml-2">Nama Pemilik :</span>
+              <span className="ltr:ml-auto rtl:mr-auto font-semibold">
+                {wajibPajak.namaPemilik}
+              </span>
+            </div>
+
+            <div className="flex items-center p-5 border-t lg:border-t-0 lg:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
+              <span className="ltr:mr-2 rtl:ml-2">No. NPWPD :</span>
+              <span className="ltr:ml-auto rtl:mr-auto font-semibold">
+                {wajibPajak.npwpd}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="lg:flex lg:-mx-4">
         <div className="lg:w-1/2 xl:w-2/3 lg:px-4 pt-5">
           <div className="lg:flex lg:-mx-4">
@@ -95,7 +131,7 @@ function Prediksis() {
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-bullseye"></span>
                 <p className="mt-2">Prediksi Rupiah</p>
-                {prediksiRupiah >= 0 && (
+                {prediksiRupiah && prediksiRupiah >= 0 && (
                   <div className="text-green-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-up-alt"></i>
                     <NumberFormat
@@ -106,7 +142,7 @@ function Prediksis() {
                     />
                   </div>
                 )}
-                {prediksiRupiah < 0 && (
+                {prediksiRupiah && prediksiRupiah < 0 && (
                   <div className="text-red-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-down-alt"></i>
                     <NumberFormat
@@ -123,13 +159,13 @@ function Prediksis() {
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-chart-line"></span>
                 <p className="mt-2">Prediksi Persentase</p>
-                {prediksiPersen >= 0 && (
+                {prediksiPersen && prediksiPersen >= 0 && (
                   <div className="text-green-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-up-alt"></i>
                     {prediksiPersen}
                   </div>
                 )}
-                {prediksiPersen < 0 && (
+                {prediksiPersen && prediksiPersen < 0 && (
                   <div className="text-red-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-down-alt"></i>
                     {prediksiPersen}
@@ -164,7 +200,7 @@ function Prediksis() {
           </div>
         </div>
         <div className="lg:w-1/2 xl:w-1/3 lg:px-4 lg:pt-0">
-          <PrediksisTable data={prediksiPelaporan} />
+          <PrediksisTable data={prediksisPemilik} />
         </div>
       </div>
     </AppLayout>
@@ -172,3 +208,7 @@ function Prediksis() {
 }
 
 export default dynamic(() => Promise.resolve(Prediksis), { ssr: false });
+
+export async function getServerSideProps({ params }) {
+  return { props: { params } };
+}
