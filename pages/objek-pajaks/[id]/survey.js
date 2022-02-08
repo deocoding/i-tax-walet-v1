@@ -51,6 +51,7 @@ function Survey({ params }) {
             setValue("tgglProyeksi", new Date());
             setObjekPajak(data.objekPajak);
             setWajibPajak(data.wajibPajak);
+            setValue("wajibPajakId", data.wajibPajak._id);
             setProyPopuls(data.proyPopuls);
           }
         } catch (err) {
@@ -61,13 +62,21 @@ function Survey({ params }) {
     }
   }, [objekPajakId]);
 
-  const populasiHandler = async ({ objekPajakId, tgglProyeksi, jumBur }) => {
+  console.log(wajibPajak);
+
+  const populasiHandler = async ({
+    objekPajakId,
+    wajibPajakId,
+    tgglProyeksi,
+    jumBur,
+  }) => {
     try {
       setLoading(true);
       const { data } = await axios.post(
         "/api/objek-pajaks/survey",
         {
           objekPajakId,
+          wajibPajakId,
           tgglProyeksi,
           jumBur,
         },
@@ -167,6 +176,10 @@ function Survey({ params }) {
                       hidden
                       {...register("objekPajakId", { required: true })}
                       value={objekPajakId}
+                    />
+                    <input
+                      hidden
+                      {...register("wajibPajakId", { required: true })}
                     />
 
                     <div className="grid grid-cols-2 gap-4">

@@ -7,6 +7,11 @@ const proyeksiPopulasiSchema = new mongoose.Schema(
       ref: "ObjekPajak",
       required: true,
     },
+    wajibPajak: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WajibPajak",
+      required: true,
+    },
     tgglProyeksi: { type: Date, required: true },
     jumBur: { type: Number, required: true },
     jumSar: { type: Number },

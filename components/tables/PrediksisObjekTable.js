@@ -2,7 +2,7 @@ import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useContext, useRef } from "react";
+import React, { useContext } from "react";
 import Moment from "react-moment";
 import NumberFormat from "react-number-format";
 import {
@@ -15,26 +15,6 @@ import { getError } from "../../utils/error";
 import { Store } from "../../utils/Store";
 import { GlobalFilter } from "./GlobalFilter";
 import "moment/locale/id";
-
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <label className="custom-checkbox">
-          <input type="checkbox" ref={resolvedRef} {...rest} />
-          <span></span>
-        </label>
-      </>
-    );
-  }
-);
 
 const defaultPropGetter = () => ({});
 
@@ -75,51 +55,10 @@ function Table({
     },
     useGlobalFilter,
     usePagination,
-    useRowSelect,
-    (hooks) => {
-      hooks.visibleColumns.push((columns) => [
-        // Let's make a column for selection
-        {
-          id: "selection",
-          // The header can use the table's getToggleAllRowsSelectedProps method
-          // to render a checkbox
-          Header: ({ getToggleAllPageRowsSelectedProps }) => (
-            <div>
-              <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
-            </div>
-          ),
-          className: "w-px",
-          // The cell can use the individual row's getToggleRowSelectedProps method
-          // to the render a checkbox
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            </div>
-          ),
-        },
-        ...columns,
-      ]);
-    }
+    useRowSelect
   );
 
-  const router = useRouter();
-  const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
-
-  const deleteAllHandler = async (pajaksIds) => {
-    if (!window.confirm("Yakin dihapus?")) {
-      return;
-    }
-    try {
-      const { data } = await axios.delete(`/api/pajaks?ids=${pajaksIds}`, {
-        headers: { authorization: `Bearer ${userInfo.token}` },
-      });
-      alert(data.pesan);
-      router.reload();
-    } catch (err) {
-      alert(getError(err));
-    }
-  };
+  const { state } = useContext(Store);
 
   const { globalFilter } = state;
 
@@ -128,52 +67,35 @@ function Table({
     <>
       <section className="breadcrumb lg:flex items-start">
         <div>
-          <h1>Pajak</h1>
-          <ul>
-            <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+          {/* <!-- Layout --> */}
+          <div className="lg:flex mt-0">
+            <Link href="/prediksis">
+              <a className="btn btn-icon btn-icon_large btn_outlined btn_primary">
+                <span className="las las-globe-asia"></span>
               </a>
-            </li>
-            <li className="divider las las-arrow-right"></li>
-            <li>Daftar Pajak</li>
-          </ul>
+            </Link>
+            <Link href="/prediksis/pemilik">
+              <a
+                href="blog-list-card-rows.html"
+                className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+              >
+                <span className="las las-money-check"></span>
+              </a>
+            </Link>
+            <Link href="/prediksis/populasi">
+              <a
+                href="blog-list-card-columns.html"
+                className="btn btn-icon btn-icon_large btn_secondary ltr:ml-2 rtl:mr-2"
+              >
+                <span className="las las-feather"></span>
+              </a>
+            </Link>
+          </div>
         </div>
 
         <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
           {/* <!-- Search --> */}
           <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-
-          <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Add New --> */}
-            <Link href="/pajaks/add" passHref>
-              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-                Tambah Baru
-              </button>
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -323,7 +245,7 @@ function Table({
         </div>
       </div>
 
-      {selectedFlatRows.length > 0 && (
+      {/* {selectedFlatRows.length > 0 && (
         <div className="footer-bar">
           <div className="flex items-center uppercase">
             <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
@@ -346,7 +268,7 @@ function Table({
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* <div className="mt-5">
         <pre>
@@ -374,8 +296,8 @@ function WajibPajaksTable({ data }) {
     () => [
       {
         Header: "Nama Pemilik",
-        accessor: "namaPemilik",
-        className: "w-1/5 ltr:text-left rtl:text-right uppercase",
+        accessor: "nama_pemilik",
+        className: "text-left uppercase",
       },
       {
         Header: "NPWPD",
@@ -383,56 +305,28 @@ function WajibPajaksTable({ data }) {
         className: "text-left uppercase",
       },
       {
-        Header: "Total Jual",
-        accessor: "nilJual",
+        Header: "Total Populasi",
+        accessor: "total_populasi",
         className: "text-left uppercase",
         Cell: ({ row }) => (
           <NumberFormat
-            value={row.original.nilJual}
+            value={row.original.total_populasi}
             displayType={"text"}
             thousandSeparator={true}
-            prefix={"Rp"}
           />
         ),
       },
       {
-        Header: "Total Pajak",
-        accessor: "totPajak",
+        Header: "Banyak Pendataan",
+        accessor: "populasiId",
         className: "text-left uppercase",
         Cell: ({ row }) => (
           <NumberFormat
-            value={row.original.totPajak}
+            value={row.original.populasiId.length}
             displayType={"text"}
             thousandSeparator={true}
-            prefix={"Rp"}
           />
         ),
-      },
-      {
-        Header: "Total Bayar",
-        accessor: "jumBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <NumberFormat
-            value={row.original.jumBayar}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"Rp"}
-          />
-        ),
-      },
-      {
-        Header: "Tanggal Bayar",
-        accessor: "tgglBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <Moment format="lll">{row.original.tgglBayar}</Moment>
-        ),
-      },
-      {
-        Header: "Status Pajak",
-        accessor: "sttsPajak",
-        className: "text-left uppercase",
       },
       {
         Header: () => null,
@@ -440,9 +334,9 @@ function WajibPajaksTable({ data }) {
         classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
         Cell: ({ row }) => (
           <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-            <Link href={`/pajaks/${row.original._id}`} passHref>
+            <Link href={`/prediksis/populasi/${row.original._id}`} passHref>
               <a className="btn btn-icon btn_outlined btn_secondary">
-                <span className="las las-pen-fancy"></span>
+                <span className="las las-binoculars"></span>
               </a>
             </Link>
           </div>

@@ -2,7 +2,7 @@ import axios from "axios";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useContext, useRef } from "react";
+import React, { useContext, useState } from "react";
 import Moment from "react-moment";
 import NumberFormat from "react-number-format";
 import {
@@ -16,26 +16,6 @@ import { Store } from "../../utils/Store";
 import { GlobalFilter } from "./GlobalFilter";
 import "moment/locale/id";
 
-const IndeterminateCheckbox = React.forwardRef(
-  ({ indeterminate, ...rest }, ref) => {
-    const defaultRef = React.useRef();
-    const resolvedRef = ref || defaultRef;
-
-    React.useEffect(() => {
-      resolvedRef.current.indeterminate = indeterminate;
-    }, [resolvedRef, indeterminate]);
-
-    return (
-      <>
-        <label className="custom-checkbox">
-          <input type="checkbox" ref={resolvedRef} {...rest} />
-          <span></span>
-        </label>
-      </>
-    );
-  }
-);
-
 const defaultPropGetter = () => ({});
 
 function Table({
@@ -43,6 +23,7 @@ function Table({
   data,
   getHeaderProps = defaultPropGetter,
   getColumnProps = defaultPropGetter,
+  getFooterProps = defaultPropGetter,
   getRowProps = defaultPropGetter,
   getCellProps = defaultPropGetter,
 }) {
@@ -51,6 +32,7 @@ function Table({
     getTableProps,
     getTableBodyProps,
     headerGroups,
+    footerGroups,
     prepareRow,
     page, // Instead of using 'rows', we'll use page,
     // which has only the rows for the active page
@@ -75,109 +57,59 @@ function Table({
     },
     useGlobalFilter,
     usePagination,
-    useRowSelect,
-    (hooks) => {
-      hooks.visibleColumns.push((columns) => [
-        // Let's make a column for selection
-        {
-          id: "selection",
-          // The header can use the table's getToggleAllRowsSelectedProps method
-          // to render a checkbox
-          Header: ({ getToggleAllPageRowsSelectedProps }) => (
-            <div>
-              <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
-            </div>
-          ),
-          className: "w-px",
-          // The cell can use the individual row's getToggleRowSelectedProps method
-          // to the render a checkbox
-          Cell: ({ row }) => (
-            <div>
-              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            </div>
-          ),
-        },
-        ...columns,
-      ]);
-    }
+    useRowSelect
+    // (hooks) => {
+    //   hooks.visibleColumns.push((columns) => [
+    //     // Let's make a column for selection
+    //     {
+    //       id: "selection",
+    //       // The header can use the table's getToggleAllRowsSelectedProps method
+    //       // to render a checkbox
+    //       Header: ({ getToggleAllPageRowsSelectedProps }) => (
+    //         <div>
+    //           <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+    //         </div>
+    //       ),
+    //       className: "w-px",
+    //       // The cell can use the individual row's getToggleRowSelectedProps method
+    //       // to the render a checkbox
+    //       Cell: ({ row }) => (
+    //         <div>
+    //           <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+    //         </div>
+    //       ),
+    //     },
+    //     ...columns,
+    //   ]);
+    // }
   );
 
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
 
-  const deleteAllHandler = async (pajaksIds) => {
-    if (!window.confirm("Yakin dihapus?")) {
-      return;
-    }
-    try {
-      const { data } = await axios.delete(`/api/pajaks?ids=${pajaksIds}`, {
-        headers: { authorization: `Bearer ${userInfo.token}` },
-      });
-      alert(data.pesan);
-      router.reload();
-    } catch (err) {
-      alert(getError(err));
-    }
-  };
+  // const deleteAllHandler = async (prediksisIds) => {
+  //   if (!window.confirm("Yakin dihapus?")) {
+  //     return;
+  //   }
+  //   try {
+  //     const { data } = await axios.delete(`/api/pajaks?ids=${pajaksIds}`, {
+  //       headers: { authorization: `Bearer ${userInfo.token}` },
+  //     });
+  //     alert(data.pesan);
+  //     router.reload();
+  //   } catch (err) {
+  //     alert(getError(err));
+  //   }
+  // };
 
   const { globalFilter } = state;
 
   // Render the UI for your table
   return (
     <>
-      <section className="breadcrumb lg:flex items-start">
-        <div>
-          <h1>Pajak</h1>
-          <ul>
-            <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
-              </a>
-            </li>
-            <li className="divider las las-arrow-right"></li>
-            <li>Daftar Pajak</li>
-          </ul>
-        </div>
-
-        <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
-          {/* <!-- Search --> */}
-          <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
-
-          <div className="flex mt-5 lg:mt-0">
-            {/* <!-- Add New --> */}
-            <Link href="/pajaks/add" passHref>
-              <button className="btn btn_primary uppercase ltr:ml-2 rtl:mr-2">
-                Tambah Baru
-              </button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="card p-5">
+      <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0"></div>
+      <div className="card p-5 mt-5">
         <div className="overflow-x-auto">
           <table
             {...getTableProps()}
@@ -237,8 +169,8 @@ function Table({
         */}
       <div className="mt-5">
         {/* <!-- Pagination --> */}
-        <div className="card lg:flex">
-          <nav className="flex flex-wrap p-5">
+        <div className="card ">
+          <nav className="flex flex-wrap p-5 items-center justify-center">
             <a
               onClick={() => gotoPage(0)}
               disabled={!canPreviousPage}
@@ -284,7 +216,7 @@ function Table({
               Akhir
             </a>
           </nav>
-          <div className="flex items-center ltr:ml-auto rtl:mr-auto p-5 border-t lg:border-t-0 border-gray-200 dark:border-gray-900">
+          <div className="flex items-center justify-center ltr:ml-auto rtl:mr-auto p-5 border-t border-gray-200 dark:border-gray-900">
             <span>
               Halaman {pageIndex + 1} dari {pageOptions.length} &nbsp;{" "}
             </span>{" "}
@@ -303,7 +235,7 @@ function Table({
               />
             </span>
           </div>
-          <div className="flex items-center p-5 border-t lg:border-t-0 lg:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
+          <div className="flex items-center p-5 border-t g:ltr:border-l lg:rtl:border-r border-gray-200 dark:border-gray-900">
             <span className="ltr:mr-2 rtl:ml-2">Tampil</span>
             <select
               value={pageSize}
@@ -322,31 +254,6 @@ function Table({
           </div>
         </div>
       </div>
-
-      {selectedFlatRows.length > 0 && (
-        <div className="footer-bar">
-          <div className="flex items-center uppercase">
-            <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
-              {selectedFlatRows.length}
-            </span>
-            Item Terpilih
-          </div>
-          <div className="ltr:ml-auto rtl:mr-auto">
-            <button
-              className="btn btn_danger uppercase"
-              // onClick={() =>
-              //   deleteAllHandler(selectedFlatRows.map((d) => d.original._id))
-              // }
-              onClick={() =>
-                deleteAllHandler(selectedFlatRows.map((d) => d.original._id))
-              }
-            >
-              <span className="las las-trash-alt text-xl leading-none ltr:mr-2 rtl:ml-2"></span>
-              Hapus
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* <div className="mt-5">
         <pre>
@@ -373,79 +280,25 @@ function WajibPajaksTable({ data }) {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Nama Pemilik",
-        accessor: "namaPemilik",
-        className: "w-1/5 ltr:text-left rtl:text-right uppercase",
-      },
-      {
-        Header: "NPWPD",
-        accessor: "npwpd",
+        Header: "Tahun",
+        accessor: "_id.tahun",
         className: "text-left uppercase",
       },
       {
-        Header: "Total Jual",
-        accessor: "nilJual",
+        Header: "Bulan",
+        accessor: "_id.bulan",
         className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <NumberFormat
-            value={row.original.nilJual}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"Rp"}
-          />
-        ),
       },
       {
-        Header: "Total Pajak",
-        accessor: "totPajak",
+        Header: "Total Populasi (Y)",
+        accessor: "total_populasi",
         className: "text-left uppercase",
         Cell: ({ row }) => (
           <NumberFormat
-            value={row.original.totPajak}
+            value={row.original.total_populasi}
             displayType={"text"}
             thousandSeparator={true}
-            prefix={"Rp"}
           />
-        ),
-      },
-      {
-        Header: "Total Bayar",
-        accessor: "jumBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <NumberFormat
-            value={row.original.jumBayar}
-            displayType={"text"}
-            thousandSeparator={true}
-            prefix={"Rp"}
-          />
-        ),
-      },
-      {
-        Header: "Tanggal Bayar",
-        accessor: "tgglBayar",
-        className: "text-left uppercase",
-        Cell: ({ row }) => (
-          <Moment format="lll">{row.original.tgglBayar}</Moment>
-        ),
-      },
-      {
-        Header: "Status Pajak",
-        accessor: "sttsPajak",
-        className: "text-left uppercase",
-      },
-      {
-        Header: () => null,
-        id: "aksi",
-        classNameCell: "ltr:text-right rtl:text-left whitespace-nowrap",
-        Cell: ({ row }) => (
-          <div className="inline-flex ltr:ml-auto rtl:mr-auto">
-            <Link href={`/pajaks/${row.original._id}`} passHref>
-              <a className="btn btn-icon btn_outlined btn_secondary">
-                <span className="las las-pen-fancy"></span>
-              </a>
-            </Link>
-          </div>
         ),
       },
     ],

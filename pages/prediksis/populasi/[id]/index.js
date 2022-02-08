@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from "react";
 import NumberFormat from "react-number-format";
 import { ProyeksiChart } from "../../../../components/charts/ProyeksiChart.tsx";
 import AppLayout from "../../../../components/layouts/app/AppLayout";
-import PrediksisTable from "../../../../components/tables/PrediksisTable";
+import PrediksisPopulasiTable from "../../../../components/tables/PrediksisPopulasiTable";
 import { Store } from "../../../../utils/Store";
 
 function Prediksis({ params }) {
@@ -29,7 +29,7 @@ function Prediksis({ params }) {
       const fetchPrediksis = async () => {
         try {
           const res = await axios.get(
-            `/api/prediksis/pemilik/${wajibPajakId}`,
+            `/api/prediksis/populasi/${wajibPajakId}`,
             {
               headers: { authorization: `Bearer ${userInfo.token}` },
             }
@@ -63,9 +63,9 @@ function Prediksis({ params }) {
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>
-            <li>Prediksi Potensi Pajak Pemilik</li>
+            <li>Prediksi Potensi Populasi</li>
             <li className="divider las las-arrow-right"></li>
-            <li>Pembayaran Berikutnya</li>
+            <li>Bulan Berikutnya</li>
           </ul>
         </div>
       </section>
@@ -80,7 +80,7 @@ function Prediksis({ params }) {
         <Link href="/prediksis/pemilik">
           <a
             href="blog-list-card-rows.html"
-            className="btn btn-icon btn-icon_large btn_secondary ltr:ml-2 rtl:mr-2"
+            className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
           >
             <span className="las las-money-check"></span>
           </a>
@@ -88,7 +88,7 @@ function Prediksis({ params }) {
         <Link href="/prediksis/populasi">
           <a
             href="blog-list-card-columns.html"
-            className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
+            className="btn btn-icon btn-icon_large btn_secondary ltr:ml-2 rtl:mr-2"
           >
             <span className="las las-feather"></span>
           </a>
@@ -130,7 +130,7 @@ function Prediksis({ params }) {
             <div className="lg:w-1/2 lg:px-4">
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-bullseye"></span>
-                <p className="mt-2">Prediksi Rupiah</p>
+                <p className="mt-2">Prediksi Total Populasi</p>
                 {prediksiRupiah && prediksiRupiah >= 0 && (
                   <div className="text-green-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-up-alt"></i>
@@ -138,7 +138,6 @@ function Prediksis({ params }) {
                       value={prediksiRupiah}
                       displayType={"text"}
                       thousandSeparator={true}
-                      prefix={"Rp"}
                     />
                   </div>
                 )}
@@ -149,7 +148,6 @@ function Prediksis({ params }) {
                       value={prediksiRupiah}
                       displayType={"text"}
                       thousandSeparator={true}
-                      prefix={"Rp"}
                     />
                   </div>
                 )}
@@ -200,7 +198,7 @@ function Prediksis({ params }) {
           </div>
         </div>
         <div className="lg:w-1/2 xl:w-1/3 lg:px-4 lg:pt-0">
-          <PrediksisTable data={prediksisPemilik} />
+          <PrediksisPopulasiTable data={prediksisPemilik} />
         </div>
       </div>
     </AppLayout>

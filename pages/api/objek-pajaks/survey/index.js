@@ -82,6 +82,7 @@ handler.post(async (req, res) => {
   } else {
     const newProyeksiPopulasi = await new ProyeksiPopulasi({
       objekPajak: req.body.objekPajakId,
+      wajibPajak: req.body.wajibPajakId,
       tgglProyeksi: req.body.tgglProyeksi,
       jumBur: req.body.jumBur,
     });
