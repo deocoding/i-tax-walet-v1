@@ -9,35 +9,6 @@ handler.use(isAuth);
 handler.get(async (req, res) => {
   await db.connect();
 
-  //   const prediksis = await Pajak.aggregate([
-  //     {
-  //       $lookup: {
-  //         from: "wajibpajaks",
-  //         localField: "wajibPajak",
-  //         foreignField: "_id",
-  //         as: "fromWajibPajak",
-  //       },
-  //     },
-  //     {
-  //       $replaceRoot: {
-  //         newRoot: {
-  //           $mergeObjects: [{ $arrayElemAt: ["$fromWajibPajak", 0] }, "$$ROOT"],
-  //         },
-  //       },
-  //     },
-  //     { $project: { fromWajibPajak: 0 } },
-  //     {
-  //       $group: {
-  //         _id: { nama_pemilik: "$namaPemilik", npwpd: "$npwpd" },
-  //         total_penjualan: { $sum: "$totJual" },
-  //         total_pajak: { $sum: "$totPajak" },
-  //         total_bayar: { $sum: "$jumBayar" },
-  //         count: { $sum: 1 },
-  //       },
-  //     },
-  //     { $match: { $expr: { $gte: ["$count", 5] } } },
-  //   ]);
-
   const prediksis = await Pajak.aggregate([
     {
       $lookup: {
@@ -65,106 +36,17 @@ handler.get(async (req, res) => {
             $month: { date: "$tgglBayar", timezone: "Asia/Jakarta" },
           },
         },
-        // total_penjualan: { $sum: "$totJual" },
-        // total_pajak: { $sum: "$totPajak" },
         total_bayar: { $sum: "$jumBayar" },
         count: { $sum: 1 },
       },
     },
     {
-      $sort: { _id: -1, tgglBayar: 1 },
+      $sort: { _id: 1 },
     },
-    // ===================== GRUP USER =======================
-    //
-    // {
-    //   $group: {
-    //     _id: {
-    //       id: "$wajibPajak",
-    //       nama_pemilik: "$namaPemilik",
-    //       npwpd: "$npwpd",
-    //     },
-    //     total_penjualan: { $sum: "$totJual" },
-    //     total_pajak: { $sum: "$totPajak" },
-    //     total_bayar: { $sum: "$jumBayar" },
-    //     count: { $sum: 1 },
-    //   },
-    // },
-    // ==========================================================
     { $match: { $expr: { $eq: ["$_id.tahun", new Date().getFullYear()] } } },
-    // {
-    //   $addFields: {
-    //     angkaX: {
-    //       $function: {
-    //         body: function (_id) {
-    //           let total = Array.sum(_id);
-    //           return total;
-    //         },
-    //         args: ["$_id"],
-    //         lang: "js",
-    //       },
-    //     },
-    //   },
-    // },
   ]);
 
   if (prediksis) {
-    // const count = prediksis.length;
-    // const countOdd = count % 2 == 1 && true;
-    // let x_awal = Math.floor(count / 2);
-    // let x = [];
-    // if (countOdd) {
-    //   for (let i = 0; i < count; i++) {
-    //     x.push({ x: x_awal });
-    //     x_awal--;
-    //   }
-    // } else {
-    //   for (let i = 0; i < count / 2; i++) {
-    //     x.push(x_awal - 1);
-    //     x_awal--;
-    //   }
-    //   x_awal = 1;
-    //   for (let i = 0; i < count / 2; i++) {
-    //     x.push(x_awal - 1);
-    //     x_awal--;
-    //   }
-    // }
-    // const myObject = [
-    //   { a: 1, b: 2, c: 3 },
-    //   { a: 1, b: 2, c: 3 },
-    // ];
-    // const mapped = prediksis.map((element) => ({
-    //   x: prediksis.length,
-    //   ...element,
-    // }));
-
-    // const xTambahan = prediksis.map((item, index) => {
-    //   const container = {};
-    //   container._id = item._id;
-    //   const count = prediksis.length;
-    //   const countOdd = count % 2 == 1 && true;
-    //   let x_awal = Math.floor(count / 2);
-    //   if (countOdd) {
-    //     for (let i = 0; i < count; i++) {
-    //       if (index == i) {
-    //         container.x = x_awal;
-    //       }
-    //       x_awal--;
-    //     }
-    //   } else {
-    //     for (let i = 0; i < count; i++) {
-    //       if (i == count / 2) {
-    //         x_awal = 1;
-    //       }
-    //       if (index == i) {
-    //         container.x = x_awal - 1;
-    //       }
-
-    //       x_awal--;
-    //     }
-    //   }
-    //   return container;
-    // });
-
     await prediksis.forEach((object, index) => {
       const count = prediksis.length;
       const countOdd = count % 2 == 1 && true;
@@ -221,8 +103,8 @@ handler.get(async (req, res) => {
       return d;
     });
 
-    await bulans.reverse();
-    await pendapatans.reverse();
+    // await bulans.reverse();
+    // await pendapatans.reverse();
     await prediksiPersen.toFixed(2);
 
     console.log(

@@ -56,7 +56,7 @@ function Laporans() {
                     <span className="las las-folder las-4x"></span>
                   </div>
                   <div className="body">
-                    <h5>Pajak</h5>
+                    <h5>Pembayaran Pajak</h5>
                   </div>
                 </div>
               </Link>
@@ -69,7 +69,7 @@ function Laporans() {
                     <span className="las las-folder las-4x"></span>
                   </div>
                   <div className="body">
-                    <h5>Prediksi</h5>
+                    <h5>Prediksi Pajak</h5>
                   </div>
                 </div>
               </Link>

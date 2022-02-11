@@ -502,7 +502,7 @@ function Laporans() {
             </Link>
           </li>
           <li className="divider las las-arrow-right"></li>
-          <li>Pajak</li>
+          <li>Pembayaran Pajak</li>
         </ul>
       </div>
 
@@ -516,7 +516,7 @@ function Laporans() {
                   <span className="las las-file-excel las-4x"></span>
                 </div>
                 <div className="body">
-                  <h5>Pajak</h5>
+                  <h5>Pembayaran Pajak</h5>
                 </div>
               </div>
             </div>

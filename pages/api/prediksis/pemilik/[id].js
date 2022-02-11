@@ -56,7 +56,7 @@ handler.get(async (req, res) => {
     },
     { $match: { $expr: { $eq: ["$_id.tahun", new Date().getFullYear()] } } },
     {
-      $sort: { _id: -1, tgglBayar: 1 },
+      $sort: { _id: 1 },
     },
   ]);
 
@@ -116,8 +116,8 @@ handler.get(async (req, res) => {
     return d;
   });
 
-  await bulans.reverse();
-  await pendapatans.reverse();
+  // await bulans.reverse();
+  // await pendapatans.reverse();
   await prediksiPersen.toFixed(2);
 
   console.log(bulans + " " + yAkhir + " " + prediksiPersen + " " + totalBaris);
