@@ -36,7 +36,7 @@ function ObjekPajaks() {
   return (
     <AppLayout title="Objek Pajak">
       {/* <!-- Breadcrumb --> */}
-      <ObjekPajaksTable data={objekPajaks} />
+      <ObjekPajaksTable data={objekPajaks} userInfo={userInfo} />
     </AppLayout>
   );
 }

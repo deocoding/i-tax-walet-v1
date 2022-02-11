@@ -131,8 +131,11 @@ function Table({
           <h1>Pajak</h1>
           <ul>
             <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+              <a>
+                {userInfo && userInfo.role == 1 && <span>Superadmin</span>}
+                {userInfo && userInfo.role == 2 && <span>Admin</span>}
+                {userInfo && userInfo.role == 3 && <span>Surveyor</span>}
+                {userInfo && userInfo.role == 4 && <span>Operator</span>}
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>
@@ -141,28 +144,6 @@ function Table({
         </div>
 
         <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
           {/* <!-- Search --> */}
           <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
 
@@ -323,48 +304,36 @@ function Table({
         </div>
       </div>
 
-      {selectedFlatRows.length > 0 && (
-        <div className="footer-bar">
-          <div className="flex items-center uppercase">
-            <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
-              {selectedFlatRows.length}
-            </span>
-            Item Terpilih
-          </div>
-          <div className="ltr:ml-auto rtl:mr-auto">
-            <button
-              className="btn btn_danger uppercase"
-              // onClick={() =>
-              //   deleteAllHandler(selectedFlatRows.map((d) => d.original._id))
-              // }
-              onClick={() =>
-                deleteAllHandler(selectedFlatRows.map((d) => d.original._id))
-              }
-            >
-              <span className="las las-trash-alt text-xl leading-none ltr:mr-2 rtl:ml-2"></span>
-              Hapus
-            </button>
-          </div>
-        </div>
+      {userInfo && (userInfo.role == 1 || userInfo.role == 2) && (
+        <>
+          {selectedFlatRows.length > 0 && (
+            <div className="footer-bar">
+              <div className="flex items-center uppercase">
+                <span className="text-base badge badge_primary  ltr:mr-2 rtl:ml-2">
+                  {selectedFlatRows.length}
+                </span>
+                Item Terpilih
+              </div>
+              <div className="ltr:ml-auto rtl:mr-auto">
+                <button
+                  className="btn btn_danger uppercase"
+                  // onClick={() =>
+                  //   deleteAllHandler(selectedFlatRows.map((d) => d.original._id))
+                  // }
+                  onClick={() =>
+                    deleteAllHandler(
+                      selectedFlatRows.map((d) => d.original._id)
+                    )
+                  }
+                >
+                  <span className="las las-trash-alt text-xl leading-none ltr:mr-2 rtl:ml-2"></span>
+                  Hapus
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
-
-      {/* <div className="mt-5">
-        <pre>
-          <code>
-            {JSON.stringify(
-              {
-                selectedRowIds: selectedRowIds,
-                "selectedFlatRows[].length": selectedFlatRows.length,
-                "selectedFlatRows[].original": selectedFlatRows.map(
-                  (d) => d.original._id
-                ),
-              },
-              null,
-              2
-            )}
-          </code>
-        </pre>
-      </div> */}
     </>
   );
 }

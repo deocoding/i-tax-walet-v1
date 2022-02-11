@@ -171,7 +171,12 @@ function PajaksAdd() {
       <section className="breadcrumb">
         <h1>Pajak</h1>
         <ul>
-          <li>{userInfo && userInfo.role === 1 && <span>Superadmin</span>}</li>
+          <li>
+            {userInfo && userInfo.role == 1 && <span>Superadmin</span>}
+            {userInfo && userInfo.role == 2 && <span>Admin</span>}
+            {userInfo && userInfo.role == 3 && <span>Surveyor</span>}
+            {userInfo && userInfo.role == 4 && <span>Operator</span>}
+          </li>
           <li className="divider las las-arrow-right"></li>
           <li>Tambah Pajak</li>
         </ul>

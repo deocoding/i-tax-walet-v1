@@ -35,7 +35,7 @@ function WajibPajaks() {
 
   return (
     <AppLayout title="Wajib Pajak">
-      <WajibPajaksTable data={wajibPajaks} />
+      <WajibPajaksTable data={wajibPajaks} userInfo={userInfo} />
     </AppLayout>
   );
 }

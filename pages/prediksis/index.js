@@ -51,8 +51,11 @@ function Prediksis() {
           <h1>Prediksi</h1>
           <ul>
             <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+              <a>
+                {userInfo && userInfo.role == 1 && <span>Superadmin</span>}
+                {userInfo && userInfo.role == 2 && <span>Admin</span>}
+                {userInfo && userInfo.role == 3 && <span>Surveyor</span>}
+                {userInfo && userInfo.role == 4 && <span>Operator</span>}
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>

@@ -128,8 +128,9 @@ function Table({
           <h1>User</h1>
           <ul>
             <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+              <a>
+                {userInfo && userInfo.role == 1 && <span>Superadmin</span>}
+                {userInfo && userInfo.role == 2 && <span>Admin</span>}
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>
@@ -138,28 +139,6 @@ function Table({
         </div>
 
         <div className="lg:flex items-center ltr:ml-auto rtl:mr-auto mt-5 lg:mt-0">
-          {/* <!-- Layout --> */}
-          <div className="flex mt-5 lg:mt-0">
-            <a
-              href="#"
-              className="btn btn-icon btn-icon_large btn_outlined btn_primary"
-            >
-              <span className="las las-bars"></span>
-            </a>
-            <a
-              href="blog-list-card-rows.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-list"></span>
-            </a>
-            <a
-              href="blog-list-card-columns.html"
-              className="btn btn-icon btn-icon_large btn_outlined btn_secondary ltr:ml-2 rtl:mr-2"
-            >
-              <span className="las las-th-large"></span>
-            </a>
-          </div>
-
           {/* <!-- Search --> */}
           <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
 

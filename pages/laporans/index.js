@@ -22,8 +22,11 @@ function Laporans() {
           <h1>Laporan</h1>
           <ul>
             <li>
-              <a href="#">
-                {userInfo && userInfo.role === 1 && <span>Superadmin</span>}
+              <a>
+                {userInfo && userInfo.role == 1 && <span>Superadmin</span>}
+                {userInfo && userInfo.role == 2 && <span>Admin</span>}
+                {userInfo && userInfo.role == 3 && <span>Surveyor</span>}
+                {userInfo && userInfo.role == 4 && <span>Operator</span>}
               </a>
             </li>
             <li className="divider las las-arrow-right"></li>
@@ -61,19 +64,23 @@ function Laporans() {
                 </div>
               </Link>
             </div>
+
             {/* Folder Laporan Prediksi */}
-            <div className="sm:w-1/2 lg:w-1/3 mb-5 sm:px-4">
-              <Link href="/laporans/prediksis">
-                <div className="card card_hoverable card_list cursor-pointer">
-                  <div className="image image_icon">
-                    <span className="las las-folder las-4x"></span>
+            {userInfo && (userInfo.role == 1 || userInfo.role == 2) && (
+              <div className="sm:w-1/2 lg:w-1/3 mb-5 sm:px-4">
+                <Link href="/laporans/prediksis">
+                  <div className="card card_hoverable card_list cursor-pointer">
+                    <div className="image image_icon">
+                      <span className="las las-folder las-4x"></span>
+                    </div>
+                    <div className="body">
+                      <h5>Prediksi Pajak</h5>
+                    </div>
                   </div>
-                  <div className="body">
-                    <h5>Prediksi Pajak</h5>
-                  </div>
-                </div>
-              </Link>
-            </div>
+                </Link>
+              </div>
+            )}
+
             {/* Folder Laporan Rekap */}
             <div className="sm:w-1/2 lg:w-1/3 mb-5 sm:px-4">
               <Link href="/laporans/sebarans">

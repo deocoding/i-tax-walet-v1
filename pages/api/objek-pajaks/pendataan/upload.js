@@ -67,14 +67,6 @@ handler.post(async (req, res) => {
   const berhasil = await objekPajak.save();
   await db.disconnect();
   res.send(berhasil);
-
-  //   const response = await cloudinary.uploader.upload(req.file, {
-  //     folder: "i-tax-walet",
-  //     width: 800,
-  //     crop: "scale",
-  //   });
-  //   res.send(response);
-  //   console.log(images[0]);
 });
 
 export default handler;

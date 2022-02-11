@@ -1,6 +1,8 @@
 import Tippy from "@tippyjs/react";
 import Cookies from "js-cookie";
 import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { Store } from "../../../utils/Store";
@@ -13,8 +15,19 @@ function TopBar() {
   const { state, dispatch } = useContext(Store);
   const { userInfo } = state;
 
+  const [singkatan, setSingkatan] = useState("");
+
   useEffect(() => {
     setMounted(true);
+    const setAcronymName = (nama) => {
+      const ckpDua = nama.split(" ").slice(0, 2).join(" ");
+      const matches = ckpDua.match(/\b(\w)/g);
+      const singNama = matches.join("");
+      setSingkatan(singNama);
+    };
+    if (userInfo) {
+      setAcronymName(userInfo.username);
+    }
   }, [userInfo]);
 
   const renderThemeChanger = () => {
@@ -325,64 +338,6 @@ function TopBar() {
           </Tippy>
         </div>
 
-        {/* <!-- Notifications --> */}
-        <div className="dropdown self-stretch">
-          <Tippy
-            theme="light-border"
-            allowHTML={!0}
-            zIndex={25}
-            offset={[0, 8]}
-            arrow={!0}
-            placement="bottom-start"
-            interactive={!0}
-            animation="shift-toward-extreme"
-            content={
-              <span>
-                <div className="flex items-center px-5 py-2">
-                  <h5 className="mb-0 uppercase">Notifikasi</h5>
-                  {/* Components BtnOutlinedWarning */}
-                  <button className="btn btn_outlined btn_warning uppercase ltr:ml-auto rtl:mr-auto text-white">
-                    Lihat semua
-                  </button>
-                </div>
-                <hr className="dark:border dark:border-color-netral-900" />
-                <div className="p-5 hover:bg-primary-100 dark:hover:bg-primary-900">
-                  <a href="#">
-                    <h6 className="uppercase">Heading One</h6>
-                  </a>
-                  <p>Lorem ipsum dolor, sit amet consectetur.</p>
-                  <small>Today</small>
-                </div>
-                <hr className="dark:border-color-netral-900" />
-                <div className="p-5 hover:bg-primary-100 dark:hover:bg-primary-900">
-                  <a href="#">
-                    <h6 className="uppercase">Heading Two</h6>
-                  </a>
-                  <p>Mollitia sequi dolor architecto aut deserunt.</p>
-                  <small>Yesterday</small>
-                </div>
-                <hr className="dark:border-color-netral-900" />
-                <div className="p-5 hover:bg-primary-100 dark:hover:bg-primary-900">
-                  <a href="#">
-                    <h6 className="uppercase">Heading Three</h6>
-                  </a>
-                  <p>Nobis reprehenderit sed quos deserunt</p>
-                  <small>Last Week</small>
-                </div>
-              </span>
-            }
-          >
-            <button
-              type="button"
-              className="relative flex items-center h-full btn-link ltr:ml-4 rtl:mr-4 px-2 text-2xl leading-none las las-bell "
-            >
-              <span className="absolute top-0 right-0 rounded-full border border-primary -mt-1 -mr-1 px-2 leading-tight text-xs font-body text-primary">
-                3
-              </span>
-            </button>
-          </Tippy>
-        </div>
-
         {/* <!-- User Menu --> */}
         <div className="dropdown">
           <Tippy
@@ -405,14 +360,12 @@ function TopBar() {
                   </div>
                   <hr />
                   <div className="p-5">
-                    <a className="flex items-center text-gray-700 dark:text-gray-500 hover:text-primary dark:hover:text-primary cursor-pointer">
-                      <span className="las las-user-circle text-2xl leading-none ltr:mr-2 rtl:ml-2"></span>
-                      Lihat Profile
-                    </a>
-                    <div className="flex items-center text-gray-700 dark:text-gray-500 hover:text-primary dark:hover:text-primary mt-5 cursor-pointer">
-                      <span className="las las-key text-2xl leading-none ltr:mr-2 rtl:ml-2"></span>
-                      Ubah Password
-                    </div>
+                    <Link href="/profile" passHref>
+                      <a className="flex items-center text-gray-700 dark:text-gray-500 hover:text-primary dark:hover:text-primary cursor-pointer">
+                        <span className="las las-user-circle text-2xl leading-none ltr:mr-2 rtl:ml-2"></span>
+                        Lihat Profile
+                      </a>
+                    </Link>
                   </div>
                   <hr />
                   <div className="p-5">
@@ -429,7 +382,19 @@ function TopBar() {
             }
           >
             <button className="flex items-center ltr:ml-4 rtl:mr-4 text-gray-700">
-              <span className="avatar">JD</span>
+              <span className="avatar">
+                {userInfo && userInfo.image ? (
+                  <Image
+                    src={userInfo.image}
+                    alt=""
+                    layout="fill"
+                    objectFit="fit"
+                    quality={30}
+                  />
+                ) : (
+                  <span className="uppercase">{singkatan}</span>
+                )}
+              </span>
             </button>
           </Tippy>
         </div>
