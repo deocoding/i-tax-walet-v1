@@ -128,12 +128,12 @@ function Profile() {
       if (data) {
         setPesanImage(data.pesan);
         setLoadingImage(false);
-        setTimeout(async () => {
-          setPesanImage("");
-        }, 1500);
         setGambarProfile(data.public_id);
         setValue2("gambar", data.public_id);
         setBtnTambahGambar(true);
+        setTimeout(async () => {
+          setPesanImage("");
+        }, 1500);
       }
     } catch (err) {
       alert(getError(err));
@@ -328,7 +328,7 @@ function Profile() {
                   <input
                     type="file"
                     hidden
-                    {...register2("gambar", { required: true })}
+                    {...register2("gambar")}
                     onChange={uploadHandler}
                   />
                   <div className="input-group-item btn btn_primary uppercase">

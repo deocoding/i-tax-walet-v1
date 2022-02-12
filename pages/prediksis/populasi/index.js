@@ -34,8 +34,6 @@ function Prediksis() {
     fetchPrediksis();
   }, [userInfo]);
 
-  console.log(prediksisPopulasi);
-
   return (
     <AppLayout title="Prediksi">
       <section className="breadcrumb lg:flex items-start">

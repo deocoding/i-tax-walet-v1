@@ -10,7 +10,7 @@ handler.use(isAuth);
 handler.get(async (req, res) => {
   await db.connect();
 
-  const totalRealisasi = await Pajak.aggregate([
+  const totalRealisasi2 = await Pajak.aggregate([
     {
       $group: {
         _id: 1,
@@ -25,7 +25,13 @@ handler.get(async (req, res) => {
     },
   ]);
 
-  const totalRealisasiBerjalan = await Pajak.aggregate([
+  let totalRealisasi = null;
+
+  if (totalRealisasi2 && totalRealisasi2.length > 0) {
+    totalRealisasi = totalRealisasi2[0].total;
+  }
+
+  const totalRealisasiBerjalan2 = await Pajak.aggregate([
     {
       $addFields: {
         tahun: {
@@ -47,6 +53,12 @@ handler.get(async (req, res) => {
       },
     },
   ]);
+
+  let totalRealisasiBerjalan = null;
+
+  if (totalRealisasiBerjalan2 && totalRealisasiBerjalan2.length > 0) {
+    totalRealisasiBerjalan = totalRealisasiBerjalan2[0].total;
+  }
 
   const totalLunas = await Pajak.count({ sttsPajak: { $eq: "LUNAS" } });
   const totalKurang = await Pajak.count({ sttsPajak: { $eq: "KURANG BAYAR" } });
@@ -109,8 +121,9 @@ handler.get(async (req, res) => {
       },
     },
     {
-      $sort: { tahun: 1, bulan: 1 },
+      $sort: { tahun: 1, bulan: -1 },
     },
+    { $match: { $expr: { $eq: ["$tahun", new Date().getFullYear()] } } },
   ]);
 
   if (prediksi && prediksi.length > 0) {
@@ -239,7 +252,7 @@ handler.get(async (req, res) => {
     });
   }
 
-  console.log(totalPopulasi);
+  console.log(totalRealisasi);
 
   res.send({
     totalRealisasi,

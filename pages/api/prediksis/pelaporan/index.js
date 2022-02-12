@@ -41,12 +41,12 @@ handler.get(async (req, res) => {
       },
     },
     {
-      $sort: { _id: 1 },
+      $sort: { _id: -1 },
     },
     { $match: { $expr: { $eq: ["$_id.tahun", new Date().getFullYear()] } } },
   ]);
 
-  if (prediksis) {
+  if (prediksis && prediksis.length > 0) {
     await prediksis.forEach((object, index) => {
       const count = prediksis.length;
       const countOdd = count % 2 == 1 && true;
@@ -103,16 +103,14 @@ handler.get(async (req, res) => {
       return d;
     });
 
-    // await bulans.reverse();
-    // await pendapatans.reverse();
+    await bulans.reverse();
+    await pendapatans.reverse();
     await prediksiPersen.toFixed(2);
 
     console.log(
       bulans + " " + yAkhir + " " + prediksiPersen + " " + totalBaris
     );
     res.send({ prediksis, prediksiRupiah, prediksiBulat, bulans, pendapatans });
-  } else {
-    res.status(404).send({ pesan: "Pajak not found" });
   }
   await db.disconnect();
 });

@@ -357,7 +357,7 @@ function UsersAdd() {
                       type="file"
                       hidden
                       accept="image/*"
-                      {...register2("gambar", { required: true })}
+                      {...register2("gambar")}
                       onChange={uploadHandler}
                     />
                     <div className="input-group-item btn btn_primary uppercase">

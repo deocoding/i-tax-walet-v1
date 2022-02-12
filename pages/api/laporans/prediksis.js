@@ -65,7 +65,7 @@ handler.post(async (req, res) => {
         },
       },
       {
-        $sort: { tahun: 1, bulan: 1 },
+        $sort: { tahun: -1, bulan: -1 },
       },
     ]);
   } else if (tipe && tipe == "tahun") {
@@ -114,7 +114,7 @@ handler.post(async (req, res) => {
         },
       },
       {
-        $sort: { tahun: 1 },
+        $sort: { tahun: -1 },
       },
     ]);
   }

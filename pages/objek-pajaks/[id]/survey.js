@@ -62,8 +62,6 @@ function Survey({ params }) {
     }
   }, [objekPajakId]);
 
-  console.log(wajibPajak);
-
   const populasiHandler = async ({
     objekPajakId,
     wajibPajakId,

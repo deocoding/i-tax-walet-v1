@@ -108,7 +108,7 @@ handler.get(async (req, res) => {
     //   },
     // },
     {
-      $sort: { _id: 1 },
+      $sort: { _id: -1 },
     },
   ]);
 
@@ -168,8 +168,8 @@ handler.get(async (req, res) => {
     return d;
   });
 
-  // await bulans.reverse();
-  // await pendapatans.reverse();
+  await bulans.reverse();
+  await pendapatans.reverse();
   await prediksiPersen.toFixed(2);
 
   // console.log(prediksisPemilik);

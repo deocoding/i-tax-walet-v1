@@ -42,7 +42,7 @@ function Prediksis() {
     fetchPrediksis();
   }, [userInfo]);
 
-  // console.log(res);
+  // console.log(bulans);
 
   return (
     <AppLayout title="Prediksi">
@@ -98,7 +98,7 @@ function Prediksis() {
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-bullseye"></span>
                 <p className="mt-2">Prediksi Rupiah</p>
-                {prediksiRupiah >= 0 && (
+                {prediksiRupiah && prediksiRupiah >= 0 && (
                   <div className="text-green-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-up-alt"></i>
                     <NumberFormat
@@ -109,7 +109,7 @@ function Prediksis() {
                     />
                   </div>
                 )}
-                {prediksiRupiah < 0 && (
+                {prediksiRupiah && prediksiRupiah < 0 && (
                   <div className="text-red-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-down-alt"></i>
                     <NumberFormat
@@ -126,13 +126,13 @@ function Prediksis() {
               <div className="card px-4 py-8 text-center lg:transform hover:scale-110 hover:shadow-lg transition-transform duration-200">
                 <span className="text-primary text-5xl leading-none las las-chart-line"></span>
                 <p className="mt-2">Prediksi Persentase</p>
-                {prediksiPersen >= 0 && (
+                {prediksiPersen && prediksiPersen >= 0 && (
                   <div className="text-green-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-up-alt"></i>
                     {prediksiPersen}
                   </div>
                 )}
-                {prediksiPersen < 0 && (
+                {prediksiPersen && prediksiPersen < 0 && (
                   <div className="text-red-500 mt-5 text-3xl leading-none">
                     <i className="las las-level-down-alt"></i>
                     {prediksiPersen}
@@ -142,29 +142,31 @@ function Prediksis() {
             </div>
           </div>
 
-          <div className="lg:flex lg:-mx-4 pt-5">
-            <div className="lg:w-full lg:px-4">
-              <div className="card p-5">
-                <div className="tabs">
-                  <nav className="tab-nav">
-                    <button className="nav-link h5 uppercase active">
-                      Grafik Potensi
-                    </button>
-                  </nav>
-                  <div className="tab-content mt-5">
-                    <div id="tab-2" className="collapse open">
-                      <div className="mt-5">
-                        <ProyeksiChart
-                          bulans={bulans}
-                          pendapatans={pendapatans}
-                        />
+          {bulans.length > 0 && pendapatans.length > 0 && (
+            <div className="lg:flex lg:-mx-4 pt-5">
+              <div className="lg:w-full lg:px-4">
+                <div className="card p-5">
+                  <div className="tabs">
+                    <nav className="tab-nav">
+                      <button className="nav-link h5 uppercase active">
+                        Grafik Potensi
+                      </button>
+                    </nav>
+                    <div className="tab-content mt-5">
+                      <div id="tab-2" className="collapse open">
+                        <div className="mt-5">
+                          <ProyeksiChart
+                            bulans={bulans}
+                            pendapatans={pendapatans}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="lg:w-1/2 xl:w-1/3 lg:px-4 lg:pt-0">
           <PrediksisTable data={prediksiPelaporan} />

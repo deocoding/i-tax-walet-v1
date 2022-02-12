@@ -11,8 +11,8 @@ function Dashboard() {
   const { state } = useContext(Store);
   const { userInfo } = state;
 
-  const [totalRealisasi, setTotalRealisasi] = useState();
-  const [totalRealisasiBerjalan, setTotalRealisasiBerjalan] = useState();
+  const [totalRealisasi, setTotalRealisasi] = useState(null);
+  const [totalRealisasiBerjalan, setTotalRealisasiBerjalan] = useState(null);
   const [totalLunas, setTotalLunas] = useState();
   const [totalKurang, setTotalKurang] = useState();
   const [totalDenda, setTotalDenda] = useState();
@@ -125,14 +125,12 @@ function Dashboard() {
                 <span className="text-primary text-5xl leading-none las las-cash-register"></span>
                 <p className="mt-2">Realisasi Keseluruhan</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  {totalRealisasi && (
-                    <NumberFormat
-                      value={totalRealisasi[0].total}
-                      displayType={"text"}
-                      thousandSeparator={true}
-                      prefix={"Rp"}
-                    />
-                  )}
+                  <NumberFormat
+                    value={totalRealisasi ? totalRealisasi : 0}
+                    displayType={"text"}
+                    thousandSeparator={true}
+                    prefix={"Rp"}
+                  />
                 </div>
               </div>
             </div>
@@ -142,14 +140,12 @@ function Dashboard() {
                 <span className="text-primary text-5xl leading-none las las-chart-line"></span>
                 <p className="mt-2">Realisasi Tahun Ini</p>
                 <div className="text-primary mt-5 text-3xl leading-none">
-                  {totalRealisasiBerjalan && (
-                    <NumberFormat
-                      value={totalRealisasiBerjalan[0].total}
-                      displayType={"text"}
-                      thousandSeparator={true}
-                      prefix={"Rp"}
-                    />
-                  )}
+                  <NumberFormat
+                    value={totalRealisasiBerjalan ? totalRealisasiBerjalan : 0}
+                    displayType={"text"}
+                    thousandSeparator={true}
+                    prefix={"Rp"}
+                  />
                 </div>
               </div>
             </div>
@@ -243,7 +239,7 @@ function Dashboard() {
                   <span className="text-primary text-5xl leading-none las las-glasses"></span>
                   <p className="mt-2">Prediksi Pajak Mendatang</p>
                   <div className="text-primary mt-5 text-3xl leading-none">
-                    {prediksiRupiah >= 0 && (
+                    {prediksiRupiah && prediksiRupiah >= 0 && (
                       <div className="text-green-500">
                         <i className="las las-level-up-alt"></i>
                         <NumberFormat
@@ -254,7 +250,7 @@ function Dashboard() {
                         />
                       </div>
                     )}
-                    {prediksiRupiah < 0 && (
+                    {prediksiRupiah && prediksiRupiah < 0 && (
                       <div className="text-red-500">
                         <i className="las las-level-down-alt"></i>
                         <NumberFormat
@@ -275,7 +271,7 @@ function Dashboard() {
                   <span className="text-primary text-5xl leading-none las las-divide"></span>
                   <p className="mt-2">Persentase Pajak Mendatang</p>
                   <div className="text-primary mt-5 text-3xl leading-none">
-                    {prediksiPersenBulat >= 0 && (
+                    {prediksiPersenBulat && prediksiPersenBulat >= 0 && (
                       <div className="text-green-500">
                         <i className="las las-level-up-alt"></i>
                         <NumberFormat
@@ -286,7 +282,7 @@ function Dashboard() {
                         />
                       </div>
                     )}
-                    {prediksiPersenBulat < 0 && (
+                    {prediksiPersenBulat && prediksiPersenBulat < 0 && (
                       <div className="text-red-500">
                         <i className="las las-level-down-alt"></i>
                         <NumberFormat

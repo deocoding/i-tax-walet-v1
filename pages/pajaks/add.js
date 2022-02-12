@@ -278,15 +278,10 @@ function PajaksAdd() {
                   <label className="label block mb-2" htmlFor="tgglJual">
                     Tanggal Jual
                   </label>
-                  {/* <input
-                    id="tgglJual"
-                    type="text"
-                    className="form-control"
-                    {...register("tgglJual", { required: true })}
-                  /> */}
                   <DatePicker
                     locale="id"
                     isClearable
+                    dateFormat="dd/MM/yyyy"
                     innerRef={{
                       ...register("tgglJual", { required: true }),
                     }}
@@ -296,6 +291,12 @@ function PajaksAdd() {
                       setStartDate(val);
                       setValue("tgglJual", val);
                     }}
+                    showMonthDropdown
+                    showYearDropdown
+                    yearDropdownItemNumber={15}
+                    scrollableYearDropdown
+                    withPortal
+                    portalId="root-portal"
                   />
                   <small className="block my-2 invalid-feedback">
                     {errors.tgglJual?.type === "required" &&
@@ -335,6 +336,7 @@ function PajaksAdd() {
                   <DatePicker
                     locale="id"
                     isClearable
+                    dateFormat="dd/MM/yyyy"
                     innerRef={{
                       ...register("tgglBayar", { required: true }),
                     }}
@@ -344,6 +346,12 @@ function PajaksAdd() {
                       setStartDate2(val);
                       setValue("tgglBayar", val);
                     }}
+                    showMonthDropdown
+                    showYearDropdown
+                    yearDropdownItemNumber={15}
+                    scrollableYearDropdown
+                    withPortal
+                    portalId="root-portal"
                   />
                   <small className="block my-2 invalid-feedback">
                     {errors.tgglBayar?.type === "required" &&
